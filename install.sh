@@ -2,7 +2,7 @@
 set -eu
 
 DOTFILES_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-PACKAGES="zsh git starship"
+PACKAGES="zsh git starship ghostty"
 
 if ! command -v brew >/dev/null 2>&1; then
   echo "エラー: Homebrewが必要です。https://brew.sh/ からインストールしてください。" >&2

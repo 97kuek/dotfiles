@@ -1,0 +1,39 @@
+# Appearance
+font-size = 18
+theme = Tomorrow Night
+palette = 8=#626880
+cursor-style = block
+mouse-hide-while-typing = true
+window-padding-balance = true
+window-save-state = always
+window-colorspace = display-p3
+
+# Insert a line break
+keybind = shift+enter=text:\x1b\r
+
+# Delete one word
+keybind = alt+backspace=text:\x1b\x7f
+keybind = shift+backspace=text:\x1b\x7f
+
+# Vim-style pane navigation
+keybind = ctrl+h=goto_split:left
+keybind = ctrl+j=goto_split:down
+keybind = ctrl+k=goto_split:up
+keybind = ctrl+l=goto_split:right
+
+# Split panes
+keybind = ctrl+shift+v=new_split:right
+keybind = ctrl+shift+h=new_split:down
+
+# Close the current pane
+keybind = ctrl+x=close_surface
+
+# Resize panes
+keybind = ctrl+comma=resize_split:left,10
+keybind = ctrl+period=resize_split:right,10
+keybind = ctrl+semicolon=resize_split:down,10
+keybind = ctrl+apostrophe=resize_split:up,10
+
+# Scroll
+keybind = ctrl+shift+k=scroll_page_lines:-3
+keybind = ctrl+shift+j=scroll_page_lines:3

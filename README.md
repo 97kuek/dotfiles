@@ -2,7 +2,7 @@
 
 > macOSの開発環境を再現するための個人用dotfiles
 
-- Zsh、Git、Starshipの設定をGNU Stowで配置
+- Zsh、Git、Starship、Ghosttyの設定をGNU Stowで配置
 - CLIツールとGUIアプリを`Brewfile`からインストール
 - 既存の設定ファイルは自動で削除・上書きしない
 
@@ -55,8 +55,9 @@ exec zsh
 
 - インストールするツール・アプリ: `Brewfile`
 - Zsh: `zsh/.config/zsh/config.zsh`
-- Git: `git/.gitconfig`
+- Git: `git/.gitconfig`, `git/.config/git/ignore`
 - Starship: `starship/.config/starship.toml`
+- Ghostty: `ghostty/.config/ghostty/config.ghostty`
 - 秘密情報・端末固有の設定: `~/.config/zsh/local/*.zsh`
 
 ## 注意

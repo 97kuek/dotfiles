@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+
+# Local AI tool settings
+**/.claude/settings.local.json
