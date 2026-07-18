@@ -1,7 +1,8 @@
 # dotfiles
 
-macOSの開発環境と普段使う設定を、新しいMacで再現するための個人用リポジトリです。
-設定ファイルの実体をこのリポジトリに置き、[GNU Stow](https://www.gnu.org/software/stow/)でホームディレクトリへシンボリックリンクします。
+> macOSの開発環境と普段使う設定を、新しいMacで再現するための個人用リポジトリ
+
+- 設定ファイルの実体をこのリポジトリに置き、[GNU Stow](https://www.gnu.org/software/stow/)でホームディレクトリへシンボリックリンクする。
 
 ## 管理しているもの
 
@@ -11,8 +12,6 @@ macOSの開発環境と普段使う設定を、新しいMacで再現するため
 | `git` | `~/.gitconfig` | 共通Git設定とローカル個人情報の読込 |
 | `starship` | `~/.config/starship.toml` | プロンプトの見た目 |
 | `Brewfile` | Homebrew | CLIツールとGUIアプリの一覧 |
-
-秘密情報、Gitの個人情報、会社固有の設定はリポジトリに含めません。
 
 ## 新しいMacのセットアップ
 
@@ -39,8 +38,6 @@ brew --version
 git clone https://github.com/97kuek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ```
-
-公開リポジトリなので、GitHubへの認証は不要です。
 
 ### 4. セットアップを実行する
 
