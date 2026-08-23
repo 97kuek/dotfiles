@@ -8,3 +8,5 @@
 
 # Local AI tool settings
 **/.claude/settings.local.json
+
+**/.claude/.cc-writes/
