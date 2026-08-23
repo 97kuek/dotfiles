@@ -36,7 +36,7 @@ Stowのパッケージごとにディレクトリを分けている。`install.s
 
 | パッケージ | 編集するファイル | リンク先 |
 | --- | --- | --- |
-| `zsh` | `zsh/.zshrc`, `zsh/.config/zsh/config.zsh` | `~/.zshrc`, `~/.config/zsh/config.zsh` |
+| `zsh` | `zsh/.zshrc`, `zsh/.config/zsh/*.zsh` | `~/.zshrc`, `~/.config/zsh/*.zsh` |
 | `git` | `git/.gitconfig`, `git/.config/git/ignore` | `~/.gitconfig`, `~/.config/git/ignore` |
 | `starship` | `starship/.config/starship.toml` | `~/.config/starship.toml` |
 | `ghostty` | `ghostty/.config/ghostty/config.ghostty` | `~/.config/ghostty/config.ghostty` |
@@ -53,29 +53,14 @@ Stowのパッケージごとにディレクトリを分けている。`install.s
 
 ## Claude / Codexのアカウント切り替え
 
-Claude Codeは`CLAUDE_CONFIG_DIR`、Codex CLIは`CODEX_HOME`を見て設定ディレクトリを決め、
-認証情報もその中に保存する。ディレクトリを分ければアカウントが分かれる。
-
-| プロファイル | Claude Code | Codex CLI |
-| --- | --- | --- |
-| `personal` | `~/.claude` | `~/.codex` |
-| `work1`, `work2` | `~/.ai/<profile>/claude` | `~/.ai/<profile>/codex` |
-
 ```sh
-claude              # personal（いつも通り）
-claude-work1        # work1のアカウントで起動
-codex-work2         # work2のアカウントでCodexを起動
-ai work1 <command>  # 任意のコマンドをwork1で実行
-ai-use work1        # 今のシェル全体を切り替える（プロンプトに表示される）
+ai-new work         # プロファイルを作る（初回だけ）
+claude-work         # workのアカウントで起動する。初回は /login でログインする
+codex-work          # 同じくCodex。初回は codex login
+claude              # 既定のアカウント
+ai-ls               # プロファイル一覧
+ai-use work         # 今のシェル全体を切り替える
 ```
-
-初回はプロファイルごとにログインする。Claude Codeは起動して`/login`、Codexは`codex login`。
-今どのアカウントかは、Claude Codeなら`/status`で確認できる。
-
-- `claude-work1`のようなラッパーはサブシェルで動くので、呼び出し元のシェルは変わらない。
-  戻し忘れる心配がない。
-- `~/.claude/settings.json`は各プロファイルへsymlinkされ、設定が二重管理にならない。
-- プロファイルを増減する場合は`zsh/.config/zsh/config.zsh`の`AI_PROFILES`を編集する。
 
 ## Ghosttyのキーバインド
 
