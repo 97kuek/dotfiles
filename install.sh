@@ -9,20 +9,28 @@ if ! command -v brew >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "[1/3] Homebrewパッケージをインストールします。"
+echo "[1/4] Homebrewパッケージをインストールします。"
 brew bundle --file="$DOTFILES_DIR/Brewfile"
 
-echo "[2/3] ローカル設定の保存先を用意します。"
+echo "[2/4] ローカル設定の保存先を用意します。"
 mkdir -p "$HOME/.config/zsh/local"
 touch "$HOME/.gitconfig.local"
 
-echo "[3/3] dotfilesをホームディレクトリへリンクします。"
+echo "[3/4] 既存ファイルとの競合を確認します。"
 cd "$DOTFILES_DIR"
-if ! stow --restow --target="$HOME" $PACKAGES; then
-  echo "エラー: 既存の設定ファイルと競合している可能性があります。" >&2
-  echo "競合したファイルをバックアップしてから、もう一度 ./install.sh を実行してください。" >&2
+# --simulate はリンクを作らずに競合だけを報告する。先に見せてから実行する。
+# 競合がなくても "in simulation mode" の警告は出るため、判定は終了ステータスで行う。
+if ! conflicts=$(stow --simulate --restow --target="$HOME" $PACKAGES 2>&1); then
+  echo "エラー: 以下のファイルがdotfilesと競合しています。" >&2
+  echo "$conflicts" >&2
+  echo "" >&2
+  echo "対象ファイルを退避してから、もう一度 ./install.sh を実行してください。" >&2
+  echo "  例: mv ~/.gitconfig ~/.gitconfig.before-dotfiles" >&2
   exit 1
 fi
+
+echo "[4/4] dotfilesをホームディレクトリへリンクします。"
+stow --restow --target="$HOME" $PACKAGES
 
 echo "セットアップが完了しました。新しいシェルは 'exec zsh' で開始できます。"
 echo "Gitの個人情報は ~/.gitconfig.local に設定してください。"
