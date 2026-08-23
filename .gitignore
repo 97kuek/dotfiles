@@ -3,3 +3,7 @@
 .env
 .env.*
 !.env.example
+
+# SSH: track the config only. Private keys must never reach this repository.
+ssh/.ssh/*
+!ssh/.ssh/config
