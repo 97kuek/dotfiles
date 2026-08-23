@@ -9,3 +9,19 @@
 
 [pull]
 	ff = only
+
+[push]
+	autoSetupRemote = true
+
+[rebase]
+	autoStash = true
+
+[diff]
+	algorithm = histogram
+	colorMoved = zebra
+
+[column]
+	ui = auto
+
+[branch]
+	sort = -committerdate
