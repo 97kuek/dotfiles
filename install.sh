@@ -15,7 +15,6 @@ brew bundle --file="$DOTFILES_DIR/Brewfile"
 echo "[2/4] ローカル設定の保存先を用意します。"
 mkdir -p "$HOME/.config/zsh/local"
 touch "$HOME/.gitconfig.local"
-touch "$HOME/.gitconfig.work"
 mkdir -p "$HOME/.ssh/config.d"
 chmod 700 "$HOME/.ssh" "$HOME/.ssh/config.d"
 

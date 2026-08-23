@@ -1,11 +1,6 @@
 [include]
 	path = ~/.gitconfig.local
 
-# Work identity and remotes. Adjust or add directories to match where work
-# repositories live; a missing file is ignored, so this is safe by default.
-[includeIf "gitdir:~/Documents/neoAI/"]
-	path = ~/.gitconfig.work
-
 [init]
 	defaultBranch = main
 
