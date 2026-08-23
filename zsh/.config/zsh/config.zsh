@@ -1,5 +1,9 @@
 export LANG=en_US.UTF-8
-export EDITOR=nvim
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR=nvim
+else
+  export EDITOR=vim
+fi
 
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
