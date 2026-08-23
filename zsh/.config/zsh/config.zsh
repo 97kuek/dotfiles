@@ -29,7 +29,7 @@ WORDCHARS=''
 # keep their credentials inside that directory. Pointing them elsewhere gives a
 # fully separate account. "personal" keeps the default ~/.claude and ~/.codex;
 # every other profile lives under ~/.ai/<profile>/. Add profiles here.
-AI_PROFILES=(personal work)
+AI_PROFILES=(personal work1 work2)
 
 _ai_profile_dir() {
   case "$1" in
