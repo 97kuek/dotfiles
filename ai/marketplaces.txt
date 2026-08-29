@@ -1,0 +1,11 @@
+# ClaudeとCodexのプラグイン配布元。install.shが未登録のものだけを登録する。
+#
+# 形式: <名前>  <取得元>  [対象CLI]
+#   名前     … CLIに登録される名前。plugins.txtの @ のあとに書く名前と揃える。
+#   取得元   … GitHubの owner/repo、Git URL、ローカルパス。
+#   対象CLI  … claude / codex をカンマ区切り。省略すると両方。
+#
+# #から行末まではコメント。空行は無視される。
+
+claude-plugins-official  anthropics/claude-plugins-official
+openai-codex             openai/codex-plugin-cc              claude

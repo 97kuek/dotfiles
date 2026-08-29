@@ -1,0 +1,14 @@
+# ClaudeとCodexに入れる外部プラグイン。install.shが未導入のものだけを導入する。
+#
+# 形式: <プラグイン>@<マーケットプレイス>  [対象CLI]
+#   対象CLI … claude / codex をカンマ区切り。省略すると両方。
+#
+# 中身はこのリポジトリに置かない。配布元が更新すれば
+# `claude plugin update` / `codex plugin marketplace upgrade` で新しくなる。
+# 自作スキルは ai/skills/ に置く。
+#
+# #から行末まではコメント。空行は無視される。
+
+mattpocock-skills@claude-plugins-official          # grill-me、grilling、tddなど
+clangd-lsp@claude-plugins-official        claude   # C/C++のLSP。Claudeのみ対応
+codex@openai-codex                        claude   # Claude CodeからCodexを呼ぶ

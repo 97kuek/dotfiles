@@ -4,6 +4,7 @@
 
 Zsh、Git、Starship、Ghostty、SSHの設定をGNU Stowで`~`に配置する。
 ツールとアプリは`Brewfile`からインストールする。
+ClaudeとCodexのスキル・プラグインも`install.sh`から復元する。
 
 ## セットアップ
 
@@ -42,6 +43,16 @@ Stowのパッケージごとにディレクトリを分けている。`install.s
 | `ghostty` | `ghostty/.config/ghostty/config.ghostty` | `~/.config/ghostty/config.ghostty` |
 | `ssh` | `ssh/.ssh/config` | `~/.ssh/config` |
 
+`ai/`はStowのパッケージではない。`~/.claude`と`~/.codex`は履歴やセッションなどの
+実行時の状態を設定と同じ場所に書くため、ディレクトリごとリンクすると差分が埋もれる。
+`install.sh`が必要なものだけを個別に処理する。
+
+| ファイル | 役割 |
+| --- | --- |
+| `ai/skills/<name>/SKILL.md` | 自作スキル。`~/.claude/skills/`と`~/.codex/skills/`へリンクする |
+| `ai/plugins.txt` | 外部プラグインの一覧。中身は持たず、コマンドで導入する |
+| `ai/marketplaces.txt` | プラグインの配布元。未登録のものだけを登録する |
+
 秘密情報と端末固有の設定はリポジトリの外に置き、自動で読み込む。
 
 | ファイル | 用途 |
@@ -61,6 +72,28 @@ claude              # 既定のアカウント
 ai-ls               # プロファイル一覧
 ai-use work         # 今のシェル全体を切り替える
 ```
+
+## Claude / Codexのスキル
+
+外部のスキルと自作のスキルで扱いを分ける。
+
+**外部のスキル**はプラグインとして導入する。中身はこのリポジトリに置かない。
+コピーすると配布元の更新が追えなくなるため、`ai/plugins.txt`に名前だけを書く。
+
+```sh
+# 追加したいときは ai/plugins.txt に1行足して実行する
+./install.sh
+
+claude plugin list                   # 導入済みの一覧
+claude plugin update <プラグイン>     # 更新
+codex plugin marketplace upgrade     # Codex側の更新
+```
+
+**自作のスキル**は`ai/skills/`に実体を置く。`install.sh`が`~/.claude/skills/`と
+`~/.codex/skills/`の両方へリンクするので、ここを直せば両方に反映される。
+書き方は`ai/skills/README.md`に置いてある。
+
+どちらも次に起動したセッションから使える。
 
 ## Ghosttyのキーバインド
 
@@ -99,3 +132,5 @@ Ghosttyのキーバインドはキー入力を消費するため、`Ctrl+H` `Ctr
 - APIトークンなどの秘密情報は、このリポジトリへcommitしない。
 - SSHの秘密鍵は`ssh/`配下に置かない。`.gitignore`で`ssh/.ssh/config`以外を除外している。
 - `install.sh`は何度実行しても同じ結果になる。設定を変えたあとの再適用にも使える。
+- 導入済みのプラグインと、リンク済みのスキルは飛ばす。リンク先に同じ名前の実体が
+  あるときは、上書きせずに警告を出す。
