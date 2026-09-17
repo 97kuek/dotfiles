@@ -43,7 +43,7 @@ config_dirs() {
   return 0
 }
 
-# 表示用のラベル。例: claude (既定)、codex (neoai)
+# 表示用のラベル。例: claude (既定)、claude (neoai)
 account_label() {
   if [ "$2" = "$HOME/.$1" ]; then
     echo "$1 (既定)"

@@ -1,5 +1,6 @@
 brew "cocoapods"
 brew "gh"
+brew "jq"
 brew "node"
 brew "pyenv"
 brew "starship"

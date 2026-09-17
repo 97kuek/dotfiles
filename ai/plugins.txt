@@ -13,8 +13,8 @@
 # #から行末まではコメント。空行は無視される。
 
 mattpocock-skills@claude-plugins-official          # grill-me、grilling、tddなど
-clangd-lsp@claude-plugins-official        claude   # C/C++のLSP。Claudeのみ対応
-codex@openai-codex                        claude   # Claude CodeからCodexを呼ぶ
+clangd-lsp@claude-plugins-official                 # C/C++のLSP
+codex@openai-codex                                 # Claude CodeからCodexを呼ぶ。Codexにも元から入っている
 
 # 設計→計画→実装→レビューの進め方。
 # Codexの openai-curated-remote にもあるが、ChatGPTにログインしていないアカウントでは入れられない。

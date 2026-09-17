@@ -8,4 +8,4 @@
 # #から行末まではコメント。空行は無視される。
 
 claude-plugins-official  anthropics/claude-plugins-official
-openai-codex             openai/codex-plugin-cc              claude
+openai-codex             openai/codex-plugin-cc

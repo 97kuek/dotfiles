@@ -1,7 +1,7 @@
 # スキルの一覧
 
 - このdotfilesで入れているスキルと、dotfilesの外から入ってくるスキルをまとめる
-- 入れ方の仕組みは[how-it-works.md](how-it-works.md)の7章を読む
+- 入れ方の仕組みは[ai.md](ai.md)を読む
 - `ai/skills.txt`や`ai/plugins.txt`を変えたら、この一覧も合わせて更新する
 
 ## 見方
@@ -11,7 +11,7 @@
   - /で呼ぶ：`/名前`と入力したときだけ動く
 - **呼び方の違い**
   - Claude Code：`/名前`。プラグインのスキルは`/プラグイン名:名前`
-  - Codex：`$名前`、または`/skills`から選ぶ
+  - Codex：`$名前`。プラグインのスキルは`$プラグイン名:名前`
 - **場所**
   - 共通の置き場所：`~/.agents/skills/<名前>`
   - Claude Code：`~/.claude/skills/<名前>`（`~/.ai/<アカウント>/claude/skills/`にも同じリンク）
@@ -119,7 +119,7 @@
 #### codex
 
 - 配布元：[openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
-- 対象：Claude Codeのみ（Claude CodeからCodexに作業を頼む）
+- 対象：Claude Code、Codex（Claude CodeからCodexに作業を頼むためのもの。Codexにも元から入っていたので、そのままにしている）
 - 中のスキル（codex-cli-runtimeなど3つ）は内部用で、主にコマンドから使う
 
 | コマンド | 内容 |
@@ -134,7 +134,7 @@
 #### clangd-lsp
 
 - 配布元：[claude-plugins-official](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/clangd-lsp)
-- 対象：Claude Codeのみ
+- 対象：Claude Code、Codex
 - C/C++の補完や定義ジャンプを使えるようにする。スキルは含まない
 
 ### 1.3 `ai/skills/`：自作スキル
@@ -184,6 +184,7 @@
 
 - 場所：`~/.agents/skills/`（共通の置き場所と同じ）
 - Codexにも見えているが、Cursor向けの内容なのでClaude Codeにはリンクしていない
+- 元から入っていたものなので、消さずにそのままにしている
 - automate、babysit、canvas、create-hook、create-rule、create-skill、create-subagent、env-setup、loop、migrate-to-skills、onboard、review、review-bugbot、review-security、sdk、shell、split-to-prs、statusline、update-cli-config、update-cursor-settings
 
 ### 2.5 Claude Desktopアプリ（Cowork）

@@ -1,25 +1,25 @@
 # dotfiles
 
-> macOSの開発環境を再現するための個人用dotfiles
+> macOSの開発環境を、`./install.sh`を1回実行するだけで再現するための設定集
 
-Zsh、Git、Starship、Ghostty、SSHの設定をGNU Stowで`~`に配置する。
-ツールとアプリは`Brewfile`からインストールする。
-ClaudeとCodexのスキル・プラグインも`install.sh`から復元する。
+## このリポジトリでできること
 
-仕組みの詳しい説明は[docs/how-it-works.md](docs/how-it-works.md)、
-入れているスキルの一覧は[docs/skills.md](docs/skills.md)にある。
+- **設定ファイルをまとめて管理する**：zsh、Git、SSH、Starship、Ghosttyの設定を`~`にリンクする
+- **ツールとアプリを入れる**：`Brewfile`に書いたものをHomebrewでまとめて入れる
+- **AIコーディングエージェントを揃える**：Claude CodeとCodexの本体、共通の指示、設定、プラグイン、スキルを入れる
+- **何度実行しても安全**：入っているものは飛ばし、足りないものだけを入れる。既存のファイルは上書きしない
 
 ## セットアップ
 
 ```sh
-# 1. Command Line Tools（ダイアログでインストールを完了させる）
+# 1. Command Line Tools（ダイアログが出たらインストールを完了させる）
 xcode-select --install
 
 # 2. Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# 3. clone してセットアップ
+# 3. cloneしてセットアップ
 git clone https://github.com/97kuek/dotfiles.git ~/dotfiles
 cd ~/dotfiles && ./install.sh
 
@@ -27,118 +27,59 @@ cd ~/dotfiles && ./install.sh
 git config --file ~/.gitconfig.local user.name "Your Name"
 git config --file ~/.gitconfig.local user.email "you@example.com"
 
-# 5. Zshを起動
+# 5. 新しい設定でzshを起動する
 exec zsh
+
+# 6. Claude CodeとCodexにログインする
+claude    # 起動したら /login
+codex     # 起動したら画面の案内に従う
 ```
 
-既存ファイルと競合する場合は、リンクを作る前に競合したファイルの一覧が表示される。
-表示されたファイルを退避して、もう一度`./install.sh`を実行する。
+- 既存のファイルとぶつかったときは、リンクを作る前に一覧を出して止まる
+  - 表示されたファイルを退避して（例：`mv ~/.zshrc ~/.zshrc.before-dotfiles`）、もう一度`./install.sh`を実行する
 
-## 構成
+## よく使うコマンド
 
-Stowのパッケージごとにディレクトリを分けている。`install.sh`が`~`へリンクする。
+| コマンド | やること |
+| --- | --- |
+| `./install.sh` | 全体をセットアップし直す。Brewfileや設定を変えたあとにも使う |
+| `./ai/install.sh` | Claude CodeとCodexの部分だけを反映する |
+| `ai-update` | Claude Code、Codex、プラグイン、スキルをまとめて最新にする |
+| `ai-doctor` | Claude CodeとCodexが、このリポジトリの宣言どおりになっているかを確かめる |
+| `claude-<名前>`、`codex-<名前>` | 別のアカウントで起動する（例：`claude-neoai`） |
+| `ai-use <名前>` | 今のシェル全体を、別のアカウントに切り替える |
+| `ai-ls` | アカウントの一覧 |
 
-| パッケージ | 編集するファイル | リンク先 |
+## 変更したいとき
+
+- 編集するのは、`~`にあるファイルではなく、このリポジトリのファイル
+  - `~/.zshrc`などは、このリポジトリへのリンクになっている
+
+| やりたいこと | 編集するファイル | 反映のしかた |
 | --- | --- | --- |
-| `zsh` | `zsh/.zshrc`, `zsh/.config/zsh/*.zsh` | `~/.zshrc`, `~/.config/zsh/*.zsh` |
-| `git` | `git/.gitconfig`, `git/.config/git/ignore` | `~/.gitconfig`, `~/.config/git/ignore` |
-| `starship` | `starship/.config/starship.toml` | `~/.config/starship.toml` |
-| `ghostty` | `ghostty/.config/ghostty/config.ghostty` | `~/.config/ghostty/config.ghostty` |
-| `ssh` | `ssh/.ssh/config` | `~/.ssh/config` |
+| zshのalias、環境変数、プラグイン | `zsh/.config/zsh/config.zsh` | `exec zsh` |
+| APIトークンなど、Gitに入れたくない設定 | `~/.config/zsh/local/<好きな名前>.zsh` | `exec zsh` |
+| Gitの設定 | `git/.gitconfig` | すぐに反映される |
+| SSHの接続先 | `ssh/.ssh/config`（公開したくないものは`~/.ssh/config.d/*.conf`） | すぐに反映される |
+| プロンプトの見た目 | `starship/.config/starship.toml` | すぐに反映される |
+| ターミナルの見た目やキー | `ghostty/.config/ghostty/config.ghostty` | Ghosttyで`⌘⇧,` |
+| ツールやアプリを追加する | `Brewfile` | `./install.sh` |
+| ClaudeとCodexへの共通の指示 | `ai/AGENTS.md` | 次に起動したセッションから |
+| Claude Codeの設定や許可のルール | `ai/claude/settings.json` | すぐに反映される |
+| スキルを追加・削除する | `ai/skills.txt` | `./ai/install.sh` |
+| プラグインを追加する | `ai/plugins.txt` | `./ai/install.sh` |
 
-`ai/`はStowのパッケージではない。`~/.claude`と`~/.codex`は履歴やセッションなどの
-実行時の状態を設定と同じ場所に書くため、ディレクトリごとリンクすると差分が埋もれる。
-`install.sh`が必要なものだけを個別に処理する。
+## ドキュメント
 
-| ファイル | 役割 |
+| ドキュメント | 内容 |
 | --- | --- |
-| `ai/install.sh` | `ai/`の宣言を読んで、指示・設定・プラグイン・スキルを導入する。単独でも実行できる |
-| `ai/update.sh`、`ai/doctor.sh` | `ai-update`と`ai-doctor`の実体 |
-| `ai/AGENTS.md` | ClaudeとCodexへの共通の指示 |
-| `ai/claude/settings.json` | Claude Codeの設定 |
-| `ai/plugins.txt` | 外部プラグインの一覧。CLIごと・アカウントごとにコマンドで導入する |
-| `ai/marketplaces.txt` | プラグインの配布元。未登録のものだけを登録する |
-| `ai/skills.txt` | GitHubで配布されているスキルの一覧。取得して`~/.agents/skills/`へリンクする |
-| `ai/skills/<name>/SKILL.md` | 自作スキル。`~/.agents/skills/`へリンクする |
-
-秘密情報と端末固有の設定はリポジトリの外に置き、自動で読み込む。
-
-| ファイル | 用途 |
-| --- | --- |
-| `~/.config/zsh/local/*.zsh` | Zshの秘密情報・端末固有の設定 |
-| `~/.gitconfig.local` | Gitの名前とメールアドレス |
-| `~/.ssh/config.d/*.conf` | 公開したくないSSHホスト |
-| `~/.ssh/id_*` | SSHの鍵 |
-
-## Claude / Codex
-
-Claude Codeは公式のインストーラー、CodexはBrewfileで入る。
-共通の指示、設定、プラグイン、スキルは`ai/`で管理している。
-
-| ファイル | 役割 |
-| --- | --- |
-| `ai/AGENTS.md` | 共通の指示。各アカウントの`CLAUDE.md`と`AGENTS.md`にリンクする |
-| `ai/claude/settings.json` | Claude Codeの設定と許可のルール。各アカウントの`settings.json`にリンクする |
-| `ai/plugins.txt` | 入れるプラグイン |
-| `ai/skills.txt` | GitHubから入れるスキル |
-| `ai/skills/<name>/` | 自作スキル |
-
-```sh
-ai-update           # 本体、プラグイン、スキルをまとめて最新にする
-ai-doctor           # 全アカウントが宣言どおりか確かめる
-./ai/install.sh     # 宣言を変えたあとに反映する
-```
-
-アカウントを切り替えるときは次のコマンドを使う。
-
-```sh
-ai-new work         # プロファイルを作る（初回だけ）。そのあと ./ai/install.sh
-claude-work         # workのアカウントで起動する。初回は /login でログインする
-codex-work          # 同じくCodex。初回は codex login
-claude              # 既定のアカウント
-ai-ls               # プロファイル一覧
-ai-use work         # 今のシェル全体を切り替える
-```
-
-設計の理由は[docs/how-it-works.md](docs/how-it-works.md)、
-スキルごとの内容と配布元は[docs/skills.md](docs/skills.md)にまとめている。
-
-## Ghosttyのキーバインド
-
-このリポジトリで定義しているもの。
-
-| 操作 | キー |
-| --- | --- |
-| 右に分割 | `Ctrl+Shift+V` |
-| 下に分割 | `Ctrl+Shift+H` |
-| 分割間を移動 | `Ctrl+H` / `Ctrl+J` / `Ctrl+K` / `Ctrl+L`（左/下/上/右） |
-| 分割を閉じる | `Ctrl+X` |
-| 分割のサイズ変更 | `Ctrl+,` / `Ctrl+.` / `Ctrl+;` / `Ctrl+'`（左/右/下/上に10） |
-| スクロール | `Ctrl+Shift+K` / `Ctrl+Shift+J`（上/下に3行） |
-| 改行を入力 | `Shift+Enter` |
-| 単語単位で削除 | `Alt+Backspace` / `Shift+Backspace` |
-
-Ghostty標準のキーバインドも上書きしていないので、そのまま使える。
-
-| 操作 | キー |
-| --- | --- |
-| 右に分割 / 下に分割 | `⌘D` / `⌘⇧D` |
-| 次 / 前の分割へ | `⌘]` / `⌘[` |
-| 方向で分割間を移動 | `⌘⌥` + 矢印 |
-| 分割のサイズ変更 | `⌘⌃` + 矢印 |
-| 分割のサイズを均等に | `⌘⌃=` |
-| 分割を閉じる | `⌘W` |
-| 新しいタブ / ウィンドウ | `⌘T` / `⌘N` |
-
-Ghosttyのキーバインドはキー入力を消費するため、`Ctrl+H` `Ctrl+J` `Ctrl+K` `Ctrl+L` `Ctrl+X`は
-シェルへ渡らない。`Ctrl+L`の画面クリア、`Ctrl+K`の行削除、`Ctrl+X`のプレフィックスは効かない。
-`keybind = performable:ctrl+l=goto_split:right`のように`performable:`を付けると、
-移動先の分割があるときだけGhosttyが処理し、ないときはシェルへ渡すようになる。
+| [docs/how-it-works.md](docs/how-it-works.md) | dotfiles全体の仕組み。Stow、Homebrew、zshやGhosttyなど各設定の中身 |
+| [docs/ai.md](docs/ai.md) | Claude CodeとCodexの管理。アカウント、指示、許可のルール、スキルの入れ方 |
+| [docs/skills.md](docs/skills.md) | 入れているスキルの一覧。内容、呼び方、配布元 |
 
 ## 注意
 
-- APIトークンなどの秘密情報は、このリポジトリへcommitしない。
-- SSHの秘密鍵は`ssh/`配下に置かない。`.gitignore`で`ssh/.ssh/config`以外を除外している。
-- `install.sh`は何度実行しても同じ結果になる。設定を変えたあとの再適用にも使える。
-- 導入済みのプラグインと、リンク済みのスキルは飛ばす。リンク先に同じ名前の実体が
-  あるときは、上書きせずに警告を出す。
+- APIトークンや鍵などの秘密情報は、このリポジトリにコミットしない
+  - `~/.config/zsh/local/`や`~/.ssh/config.d/`など、Gitの外に置く場所を用意している
+- このリポジトリは公開されている
+  - 会社のアカウントで作ったスキルや、社外に出せない情報も入れない

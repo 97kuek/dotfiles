@@ -23,6 +23,10 @@ note() {
   echo x >>"$notes"
 }
 
+info() {
+  echo "  ・$1"
+}
+
 section() {
   echo
   echo "■ $1"
@@ -140,7 +144,7 @@ for path in "$SKILLS_HUB"/*; do
   declared_skills | grep -qxF "$name" || others="$others $name"
 done
 if [ -n "$others" ]; then
-  note "$(tilde "$SKILLS_HUB") に他のツールが置いたスキルがあり、Codexにも見えています:$others"
+  info "$(tilde "$SKILLS_HUB") に他のツール（Cursorなど）が置いたスキル:$others"
 fi
 
 echo
