@@ -6,6 +6,9 @@ Zsh、Git、Starship、Ghostty、SSHの設定をGNU Stowで`~`に配置する。
 ツールとアプリは`Brewfile`からインストールする。
 ClaudeとCodexのスキル・プラグインも`install.sh`から復元する。
 
+仕組みの詳しい説明は[docs/how-it-works.md](docs/how-it-works.md)、
+入れているスキルの一覧は[docs/skills.md](docs/skills.md)にある。
+
 ## セットアップ
 
 ```sh
@@ -49,9 +52,11 @@ Stowのパッケージごとにディレクトリを分けている。`install.s
 
 | ファイル | 役割 |
 | --- | --- |
-| `ai/skills/<name>/SKILL.md` | 自作スキル。`~/.claude/skills/`と`~/.codex/skills/`へリンクする |
-| `ai/plugins.txt` | 外部プラグインの一覧。中身は持たず、コマンドで導入する |
+| `ai/install.sh` | 下の3つを読んで、プラグインとスキルを導入する。単独でも実行できる |
+| `ai/plugins.txt` | 外部プラグインの一覧。CLIごと・アカウントごとにコマンドで導入する |
 | `ai/marketplaces.txt` | プラグインの配布元。未登録のものだけを登録する |
+| `ai/skills.txt` | GitHubで配布されているスキルの一覧。取得して`~/.agents/skills/`へリンクする |
+| `ai/skills/<name>/SKILL.md` | 自作スキル。`~/.agents/skills/`へリンクする |
 
 秘密情報と端末固有の設定はリポジトリの外に置き、自動で読み込む。
 
@@ -65,7 +70,7 @@ Stowのパッケージごとにディレクトリを分けている。`install.s
 ## Claude / Codexのアカウント切り替え
 
 ```sh
-ai-new work         # プロファイルを作る（初回だけ）
+ai-new work         # プロファイルを作る（初回だけ）。そのあと ./ai/install.sh
 claude-work         # workのアカウントで起動する。初回は /login でログインする
 codex-work          # 同じくCodex。初回は codex login
 claude              # 既定のアカウント
@@ -75,25 +80,25 @@ ai-use work         # 今のシェル全体を切り替える
 
 ## Claude / Codexのスキル
 
-外部のスキルと自作のスキルで扱いを分ける。
+スキルの入れ方は3つある。どれも中身はこのリポジトリに置かず、宣言だけを書く（自作は除く）。
 
-**外部のスキル**はプラグインとして導入する。中身はこのリポジトリに置かない。
-コピーすると配布元の更新が追えなくなるため、`ai/plugins.txt`に名前だけを書く。
+| 入れたいもの | 書く場所 | 導入先 |
+| --- | --- | --- |
+| 複数のスキルやフックをまとめて配っているもの | `ai/plugins.txt` | CLIごと・アカウントごと |
+| GitHubにあるスキルを1つだけ | `ai/skills.txt` | `~/.agents/skills/`（ClaudeとCodexで共通） |
+| 自作のスキル | `ai/skills/<name>/` | `~/.agents/skills/`（ClaudeとCodexで共通） |
 
 ```sh
-# 追加したいときは ai/plugins.txt に1行足して実行する
-./install.sh
+./ai/install.sh                      # 宣言を追加・削除したあとに実行する。スキルの更新も兼ねる
 
-claude plugin list                   # 導入済みの一覧
-claude plugin update <プラグイン>     # 更新
+claude plugin list                   # 導入済みのプラグイン
+ls -l ~/.agents/skills               # 導入済みのスキル
+claude plugin update <プラグイン>     # プラグインの更新
 codex plugin marketplace upgrade     # Codex側の更新
 ```
 
-**自作のスキル**は`ai/skills/`に実体を置く。`install.sh`が`~/.claude/skills/`と
-`~/.codex/skills/`の両方へリンクするので、ここを直せば両方に反映される。
-書き方は`ai/skills/README.md`に置いてある。
-
-どちらも次に起動したセッションから使える。
+設計の理由は[docs/how-it-works.md](docs/how-it-works.md)、
+スキルごとの内容と配布元は[docs/skills.md](docs/skills.md)にまとめている。
 
 ## Ghosttyのキーバインド
 

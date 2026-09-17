@@ -1,0 +1,24 @@
+# ClaudeとCodexで共通に使う、GitHubで配布されているスキル。
+# ai/install.sh がリポジトリを取得し、~/.agents/skills/<名前> にリンクする。
+# Claude Codeへは、そこから ~/.claude/skills/<名前> にリンクする。
+#
+# 形式: <GitHubのowner/repo>  <リポジトリ内のスキルのディレクトリ>
+#   スキルの名前はディレクトリ名になる。
+#
+# 1つのスキルだけを入れたいときはここに書く。
+# 複数のスキルやフックをまとめて配っているものは plugins.txt に書く。
+# 一覧と内容は docs/skills.md にまとめている。追加や削除をしたら合わせて更新する。
+#
+# #から行末まではコメント。空行は無視される。
+
+# Anthropic
+anthropics/skills         skills/frontend-design        # 見た目に個性のあるUIを作る
+anthropics/skills         skills/doc-coauthoring        # 仕様書や提案書を対話しながら書く
+anthropics/skills         skills/docx                   # Word
+anthropics/skills         skills/pptx                   # PowerPoint
+anthropics/skills         skills/xlsx                   # Excel
+anthropics/skills         skills/pdf                    # PDF
+
+# Vercel
+vercel-labs/agent-skills  skills/web-design-guidelines  # UIをWeb Interface Guidelinesでレビューする
+vercel-labs/skills        skills/find-skills            # 公開されているスキルを探す

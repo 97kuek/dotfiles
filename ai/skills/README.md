@@ -1,15 +1,16 @@
 # 自作スキル
 
-ここに置いたスキルを`install.sh`が`~/.claude/skills/`と`~/.codex/skills/`の両方へ
-シンボリックリンクする。実体はこのリポジトリの1箇所だけなので、
-ここを直せばClaudeとCodexの両方に反映される。
+ここに置いたスキルを`ai/install.sh`が`~/.agents/skills/`へシンボリックリンクする。
+Codexはそこを直接読み、Claude Codeには`~/.claude/skills/`へもう一段リンクする。
+実体はこのリポジトリの1箇所だけなので、ここを直せばClaudeとCodexの両方に反映される。
 
-外部のスキルはここに置かない。プラグインとして`../plugins.txt`に宣言する。
+外部のスキルはここに置かない。1つだけ入れたいものは`../skills.txt`、
+まとめて配られているものは`../plugins.txt`に宣言する。
 
 ## 追加する
 
 スキル1つにつきディレクトリを1つ作り、`SKILL.md`を置く。
-ディレクトリ名と`name`は揃える。
+ディレクトリ名と`name`は揃える。`synced`という名前はClaude Codeが予約しているので使わない。
 
 ```sh
 mkdir -p ai/skills/my-skill
@@ -24,7 +25,8 @@ description: いつ使うスキルなのかを1行で書く。CLIはこの説明
 Claudeに踏ませたい手順をそのまま書く。
 ```
 
-`./install.sh`を実行するとリンクされ、次に起動したセッションから使えるようになる。
+`./ai/install.sh`を実行するとリンクされる。Claude Codeは実行中のセッションにも反映し、
+Codexは次に起動したセッションから使える。`docs/skills.md`の一覧にも追記する。
 
 ## 注意
 

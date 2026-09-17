@@ -131,6 +131,7 @@ ai-new() {
   done
   _ai_define_shorthands "$profile"
   print -r -- "created $AI_HOME/$profile — start it with ${AI_DEFAULT_TOOL}-${profile} and log in"
+  print -r -- "then run ~/dotfiles/ai/install.sh to add the plugins and skills to it"
 }
 
 # ai-ls — list the profiles and where each tool stores its account.
