@@ -52,7 +52,10 @@ Stowのパッケージごとにディレクトリを分けている。`install.s
 
 | ファイル | 役割 |
 | --- | --- |
-| `ai/install.sh` | 下の3つを読んで、プラグインとスキルを導入する。単独でも実行できる |
+| `ai/install.sh` | `ai/`の宣言を読んで、指示・設定・プラグイン・スキルを導入する。単独でも実行できる |
+| `ai/update.sh`、`ai/doctor.sh` | `ai-update`と`ai-doctor`の実体 |
+| `ai/AGENTS.md` | ClaudeとCodexへの共通の指示 |
+| `ai/claude/settings.json` | Claude Codeの設定 |
 | `ai/plugins.txt` | 外部プラグインの一覧。CLIごと・アカウントごとにコマンドで導入する |
 | `ai/marketplaces.txt` | プラグインの配布元。未登録のものだけを登録する |
 | `ai/skills.txt` | GitHubで配布されているスキルの一覧。取得して`~/.agents/skills/`へリンクする |
@@ -67,7 +70,26 @@ Stowのパッケージごとにディレクトリを分けている。`install.s
 | `~/.ssh/config.d/*.conf` | 公開したくないSSHホスト |
 | `~/.ssh/id_*` | SSHの鍵 |
 
-## Claude / Codexのアカウント切り替え
+## Claude / Codex
+
+Claude Codeは公式のインストーラー、CodexはBrewfileで入る。
+共通の指示、設定、プラグイン、スキルは`ai/`で管理している。
+
+| ファイル | 役割 |
+| --- | --- |
+| `ai/AGENTS.md` | 共通の指示。各アカウントの`CLAUDE.md`と`AGENTS.md`にリンクする |
+| `ai/claude/settings.json` | Claude Codeの設定と許可のルール。各アカウントの`settings.json`にリンクする |
+| `ai/plugins.txt` | 入れるプラグイン |
+| `ai/skills.txt` | GitHubから入れるスキル |
+| `ai/skills/<name>/` | 自作スキル |
+
+```sh
+ai-update           # 本体、プラグイン、スキルをまとめて最新にする
+ai-doctor           # 全アカウントが宣言どおりか確かめる
+./ai/install.sh     # 宣言を変えたあとに反映する
+```
+
+アカウントを切り替えるときは次のコマンドを使う。
 
 ```sh
 ai-new work         # プロファイルを作る（初回だけ）。そのあと ./ai/install.sh
@@ -76,25 +98,6 @@ codex-work          # 同じくCodex。初回は codex login
 claude              # 既定のアカウント
 ai-ls               # プロファイル一覧
 ai-use work         # 今のシェル全体を切り替える
-```
-
-## Claude / Codexのスキル
-
-スキルの入れ方は3つある。どれも中身はこのリポジトリに置かず、宣言だけを書く（自作は除く）。
-
-| 入れたいもの | 書く場所 | 導入先 |
-| --- | --- | --- |
-| 複数のスキルやフックをまとめて配っているもの | `ai/plugins.txt` | CLIごと・アカウントごと |
-| GitHubにあるスキルを1つだけ | `ai/skills.txt` | `~/.agents/skills/`（ClaudeとCodexで共通） |
-| 自作のスキル | `ai/skills/<name>/` | `~/.agents/skills/`（ClaudeとCodexで共通） |
-
-```sh
-./ai/install.sh                      # 宣言を追加・削除したあとに実行する。スキルの更新も兼ねる
-
-claude plugin list                   # 導入済みのプラグイン
-ls -l ~/.agents/skills               # 導入済みのスキル
-claude plugin update <プラグイン>     # プラグインの更新
-codex plugin marketplace upgrade     # Codex側の更新
 ```
 
 設計の理由は[docs/how-it-works.md](docs/how-it-works.md)、

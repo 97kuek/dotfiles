@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "opus[1m]",
+  "theme": "dark",
+  "tui": "fullscreen",
+  "agentPushNotifEnabled": true,
+  "permissions": {
+    "allow": [
+      "Read(~/**)",
+      "Read(//opt/homebrew/**)",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(git merge *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git ls-tree *)",
+      "Bash(gh pr *)",
+      "Bash(gh run *)",
+      "Bash(uv run *)",
+      "Bash(uv pip *)",
+      "Bash(uv venv *)",
+      "Bash(uv tool *)",
+      "Bash(.venv/bin/python -m pytest *)",
+      "Bash(.venv/bin/ruff check *)",
+      "Bash(.venv/bin/ruff format *)",
+      "Bash(.venv/bin/ty check *)",
+      "Bash(python3 -V)",
+      "Bash(python3 -m json.tool)",
+      "Bash(npm -v)",
+      "Bash(npm audit *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)",
+      "Bash(go test *)",
+      "Bash(go run *)"
+    ],
+    "ask": [
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push --force-with-lease *)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean *)",
+      "Bash(sudo *)"
+    ],
+    "deny": [
+      "Read(~/.ssh/id_*)",
+      "Read(~/.config/zsh/local/*.zsh)",
+      "Read(~/.codex/auth.json)",
+      "Read(~/.ai/*/codex/auth.json)",
+      "Read(~/.config/gh/hosts.yml)",
+      "Read(~/.config/gcloud/credentials.db)",
+      "Read(~/.config/gcloud/application_default_credentials.json)",
+      "Read(~/.aws/credentials)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.npmrc)",
+      "Read(**/.env)",
+      "Read(**/.env.*)"
+    ]
+  },
+  "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": true,
+    "codex@openai-codex": true,
+    "mattpocock-skills@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
+  }
+}

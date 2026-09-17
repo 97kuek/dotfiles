@@ -13,6 +13,7 @@ brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
 
 cask "android-studio"
+cask "codex"
 cask "codexbar"
 cask "flutter"
 cask "ghostty"

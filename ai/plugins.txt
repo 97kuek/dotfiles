@@ -16,6 +16,6 @@ mattpocock-skills@claude-plugins-official          # grill-me、grilling、tdd�
 clangd-lsp@claude-plugins-official        claude   # C/C++のLSP。Claudeのみ対応
 codex@openai-codex                        claude   # Claude CodeからCodexを呼ぶ
 
-# 設計→計画→実装→レビューの進め方。CLIごとに公式の配布元が違う。
-superpowers@claude-plugins-official       claude
-superpowers@openai-curated                codex
+# 設計→計画→実装→レビューの進め方。
+# Codexの openai-curated-remote にもあるが、ChatGPTにログインしていないアカウントでは入れられない。
+superpowers@claude-plugins-official

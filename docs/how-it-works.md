@@ -10,7 +10,7 @@
 - そのために、次の3種類を扱う
   - **設定ファイル**：zsh、git、ssh、Starship、Ghostty
   - **アプリとツール**：Homebrewで入れるもの
-  - **AIコーディングエージェント**：Claude CodeとCodexのプラグイン、スキル、アカウント
+  - **AIコーディングエージェント**：Claude CodeとCodexの本体、共通の指示、設定、プラグイン、スキル、アカウント
 - 3種類とも「欲しい状態をリポジトリに書いておき、`install.sh`がその状態に揃える」という考え方で作っている
 - `install.sh`は何度実行しても同じ結果になる
   - 入っているものは飛ばし、足りないものだけを入れる
@@ -34,7 +34,13 @@ dotfiles/
 ├── ssh/                    ┘
 │
 └── ai/                     ← Claude CodeとCodex（Stowは使わない）
-    ├── install.sh          ← プラグインとスキルを導入する
+    ├── install.sh          ← 指示・設定・プラグイン・スキルを導入する
+    ├── update.sh           ← まとめて更新する（ai-update）
+    ├── doctor.sh           ← 宣言どおりか確かめる（ai-doctor）
+    ├── lib.sh              ← 上の3つが共通で使う関数
+    ├── AGENTS.md           ← ClaudeとCodexへの共通の指示
+    ├── claude/
+    │   └── settings.json   ← Claude Codeの設定
     ├── marketplaces.txt    ← プラグインの配布元
     ├── plugins.txt         ← 入れるプラグイン
     ├── skills.txt          ← 入れるスキル（GitHubから取得）
@@ -44,13 +50,13 @@ dotfiles/
 ## 3. セットアップの流れ
 
 - `install.sh`は次の5つを順番に行う
-  1. **Homebrew**：`brew bundle`で`Brewfile`の中身を入れる
+  1. **Homebrew**：`brew bundle`で`Brewfile`の中身を入れる。Claude Codeが入っていなければ公式のインストーラーで入れる
   2. **ローカル設定の置き場所を作る**：`~/.config/zsh/local/`、`~/.gitconfig.local`、`~/.ssh/config.d/`
   3. **競合の確認**：`stow --simulate`で試し、既存のファイルとぶつかったら一覧を出して止まる
   4. **リンク**：`stow --restow`で設定ファイルを`~`にリンクする
-  5. **AI**：`ai/install.sh`を呼び、Claude CodeとCodexのプラグインとスキルを入れる
+  5. **AI**：`ai/install.sh`を呼び、Claude CodeとCodexの共通の指示、設定、プラグイン、スキルを入れる
 - 5だけをやり直したいときは`./ai/install.sh`を単独で実行できる
-  - Homebrewの更新を待たずに、スキルの追加や更新だけを反映できる
+  - Homebrewを待たずに、AIまわりの変更だけを反映できる
 
 ## 4. 設定ファイル：GNU Stow
 
@@ -124,6 +130,7 @@ cask "ghostty"    # GUIアプリ
 - 入れているもの
   - **CLIツール**：gh、node、pyenv、starship、stow、tmux、uv、volta、cocoapods
   - **zshのプラグイン**：zsh-autosuggestions、zsh-syntax-highlighting
+  - **AIのCLI**：Codex（`cask "codex"`）
   - **GUIアプリ**：Ghostty、Android Studio、Flutter、MacTeX、CodexBar
 - zshはHomebrewで入れない
   - ログインシェルはmacOS標準の`/bin/zsh`で、プラグインもそれで動く
@@ -207,11 +214,21 @@ cask "ghostty"    # GUIアプリ
   - ログインの情報
 - フォルダごとGitで管理すると、差分のほとんどが履歴になり、ログインの情報まで入ってしまう
 - そこで、**入れたいものを宣言しておき、`ai/install.sh`がCLIのコマンドやリンクで入れる**
-  - リポジトリに置くのは「何を入れるか」だけ
+  - リポジトリに置くのは「何を入れるか」と、自分で書いたもの（共通の指示、設定、自作スキル）だけ
   - 外部のスキルの中身は置かない。コピーすると配布元の更新を追えなくなるため
-  - 自作のスキルだけは中身を置く
 
-### 7.2 アカウントの切り替え
+### 7.2 本体のインストール
+
+- **Claude Code**
+  - 公式のインストーラー（`curl -fsSL https://claude.ai/install.sh | bash`）で`~/.local/bin/claude`に入れる
+  - この方法だと自動で更新される。Homebrewで入れると自動で更新されない
+  - `install.sh`は、`claude`が見つからないときだけインストーラーを実行する
+- **Codex**
+  - `Brewfile`の`cask "codex"`で入れる
+  - `npm i -g`で入れるのはやめた。Voltaを入れたので、npmのグローバルな場所がHomebrewのnodeとVoltaの2か所に分かれてしまうため
+- どちらも`ai-update`でまとめて更新できる（7.11）
+
+### 7.3 アカウントの切り替え
 
 - Claude Codeは`CLAUDE_CONFIG_DIR`、Codexは`CODEX_HOME`で設定フォルダの場所を決める
 - この値を差し替えると、ログイン情報ごと別のアカウントになる
@@ -219,16 +236,56 @@ cask "ghostty"    # GUIアプリ
   - 既定のアカウント（`personal`）は、今までどおり`~/.claude`と`~/.codex`を使う
   - それ以外のアカウントは`~/.ai/<名前>/claude`と`~/.ai/<名前>/codex`に置く
   - `~/.ai/`の下のフォルダを見つけて、`claude-<名前>`や`codex-<名前>`というコマンドを自動で作る
-  - Claude Codeの`settings.json`は既定のアカウントからリンクし、全アカウントで共通にしている
 - コマンド
-  - `ai-new <名前>`：アカウントを作る。そのあと`./ai/install.sh`でプラグインとスキルを入れる
+  - `ai-new <名前>`：アカウントを作る。そのあと`./ai/install.sh`で指示・設定・プラグイン・スキルを入れる
   - `claude-<名前>`、`codex-<名前>`：そのアカウントで起動する（初回はログインする）
   - `ai <名前> [コマンド]`：そのアカウントで1回だけ実行する。今のシェルは切り替わらない
   - `ai-use <名前>`：今のシェル全体を切り替える
   - `ai-ls`：アカウントと、それぞれの保存先の一覧
 - アカウントを消すときは`~/.ai/<名前>`を削除して、シェルを開き直す
 
-### 7.3 スキルとプラグインの違い
+### 7.4 共通の指示：`ai/AGENTS.md`
+
+- Claude CodeとCodexには、すべてのプロジェクトで最初に読む指示ファイルがある
+  - Claude Code：`<設定フォルダ>/CLAUDE.md`
+  - Codex：`<設定フォルダ>/AGENTS.md`
+- 書式はどちらもただのMarkdownなので、1つのファイルを両方にリンクする
+  - 実体は`ai/AGENTS.md`だけ。ここを直せば、両方のCLIの全アカウントに反映される
+- 書いていること
+  - 日本語で答える、決めるべきことは聞く
+  - 環境（macOS、zsh、Homebrew、uv、pyenv、Volta）
+  - 設定ファイルはdotfiles側を編集する
+  - コミットとpushは頼まれたときだけ、秘密情報を出さない
+- 書かないこと
+  - プロジェクトごとの指示。各リポジトリの`CLAUDE.md`や`AGENTS.md`に書く
+  - 長い説明。毎回のセッションで読み込まれるので、短く保つ
+- Claude DesktopアプリのCoworkは、リンクになっている`CLAUDE.md`を読まない
+
+### 7.5 Claude Codeの設定：`ai/claude/settings.json`
+
+- `~/.claude/settings.json`は、全アカウントでこのファイルへのリンクになる
+- 入れている設定
+  - 見た目：モデル、テーマ、全画面表示、通知
+  - 有効にするプラグインと、その配布元
+  - 許可のルール（`permissions`）
+- 許可のルールは3種類ある。評価は deny → ask → allow の順で、先に当たったものが使われる
+  - **allow**：確認せずに実行する
+    - どのプロジェクトでも使う、安全なコマンドだけを置く（git、gh、uv、pytest、ruffなど）
+    - `~/`以下の読み取りは許可する
+  - **ask**：allowに当たっても、必ず確認する
+    - `git push --force`、`git reset --hard`、`git clean`、`sudo`
+  - **deny**：実行させない
+    - 秘密情報の読み取り：SSHの鍵、`~/.config/zsh/local/*.zsh`、`.env`、Codex・gh・gcloud・AWS・Docker・npmの認証情報
+    - denyはClaudeのファイル操作と、`cat`などの分かりやすいコマンドには効く。PythonやNodeのスクリプトが中で開くファイルまでは防げない
+- 入れないもの
+  - プロジェクト専用のコマンド（`make eval`、特定のスクリプトなど）。各リポジトリの`.claude/settings.local.json`に置く
+  - 一度きりのコマンド。確認のときに「今回だけ許可」を選ぶ
+- Claude Codeは、このファイルを自分で書き換えることがある
+  - プラグインの有効化、`/config`での変更、「次回から聞かない」を選んだときなど
+  - リンクなので、その変更はdotfilesの差分に出る。`git diff`で見て、残すか戻すかを決める
+- 移行前の設定は`~/.claude/settings.json.before-dotfiles`に残している
+
+### 7.6 スキルとプラグインの違い
 
 - **スキル**
   - `SKILL.md`を1つ含むフォルダ
@@ -238,7 +295,7 @@ cask "ghostty"    # GUIアプリ
   - 複数のスキルや、フック、コマンド、LSPなどをまとめて配るための入れ物
   - マーケットプレイス（配布元）から、CLIのコマンドで入れる
 
-### 7.4 Claude CodeとCodexでは、スキルを読む場所が違う
+### 7.7 Claude CodeとCodexでは、スキルを読む場所が違う
 
 - 自分用のスキルを読む場所
 
@@ -258,7 +315,7 @@ cask "ghostty"    # GUIアプリ
   - スキルは、ClaudeとCodexで別々に置く必要がある
   - プラグインは、CLIごと・アカウントごとに入れる必要がある
 
-### 7.5 設計：スキルは1か所に集め、そこから配る
+### 7.8 設計：スキルは1か所に集め、そこから配る
 
 - **スキル**は`~/.agents/skills/`を共通の置き場所にする
   - Codexはここを直接読む
@@ -280,13 +337,18 @@ ai/skills/<名前>/ ────────────────────
 
 【プラグイン】
 ai/plugins.txt ─(claude plugin install / codex plugin add)─▶ 各CLI × 各アカウントの plugins/
+
+【共通の指示と設定】
+ai/AGENTS.md ─────────────▶ 各アカウントの CLAUDE.md（Claude Code）、AGENTS.md（Codex）
+ai/claude/settings.json ──▶ 各アカウントの settings.json（Claude Code）
 ```
 
 - **プラグイン**は、`ai/install.sh`がCLIごと・アカウントごとに同じものを入れる
-  - `ai/plugins.txt`の3列目で、ClaudeだけやCodexだけに絞れる
-  - CLIによって公式の配布元が違うものは、2行に分けて書く（例：Superpowers）
+  - `ai/plugins.txt`の2列目で、ClaudeだけやCodexだけに絞れる
+  - Codexは`claude-plugins-official`などClaude向けの配布元からもプラグインを入れられる
+  - そのためSuperpowersは、両方のCLIに同じ配布元から入れている
 
-### 7.6 どこに書くかの決め方
+### 7.9 どこに書くかの決め方
 
 - 配布元が**複数のスキルやフックをまとめたプラグイン**として配っている → `ai/plugins.txt`
   - 例：mattpocock-skills、Superpowers、codex、clangd-lsp
@@ -297,8 +359,10 @@ ai/plugins.txt ─(claude plugin install / codex plugin add)─▶ 各CLI × 各
   - プラグインで入れると、欲しくないスキルまで一緒に入ってしまうことがあるため
 - **自分で書いた**スキル → `ai/skills/<名前>/`
   - 書き方は`ai/skills/README.md`にある
+- **すべてのプロジェクトで守ってほしいこと** → `ai/AGENTS.md`
+- **Claude Codeの許可や見た目** → `ai/claude/settings.json`
 
-### 7.7 `ai/install.sh`がやること
+### 7.10 `ai/install.sh`がやること
 
 1. **プラグイン**
    - `~/.claude`と`~/.ai/*/claude`のそれぞれで、`marketplaces.txt`の配布元を登録する
@@ -311,11 +375,31 @@ ai/plugins.txt ─(claude plugin install / codex plugin add)─▶ 各CLI × 各
 3. **Claude Codeへ配る**
    - 宣言したスキルだけを、`~/.claude/skills/`と`~/.ai/*/claude/skills/`にリンクする
    - 宣言から消したスキルのリンクは片付ける
+4. **共通の指示と設定をリンクする**
+   - `ai/AGENTS.md`を、各アカウントの`CLAUDE.md`と`AGENTS.md`にリンクする
+   - `ai/claude/settings.json`を、各アカウントの`settings.json`にリンクする
 
 - 消すのは自分が作ったリンクだけ
   - 他のツールが置いたスキルや、同じ名前の実体があるときは、上書きせずに警告を出す
+  - 実体のファイルがあるときは、退避してから再実行する（例：`mv ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.before-dotfiles`）
 
-### 7.8 dotfilesの外から入ってくるスキル
+### 7.11 `ai-update`と`ai-doctor`
+
+- `ai-update`：まとめて最新にする
+  1. 本体：`claude update`と`brew upgrade --cask codex`
+  2. プラグイン：Claude Codeは全アカウントで配布元を更新してから、入っているプラグインを1つずつ更新する。Codexは全アカウントで配布元を更新する
+  3. スキル：`ai/install.sh`を実行し、`skills.txt`のリポジトリを取得し直して宣言に揃える
+  - 起動中のセッションには、再起動すると反映される
+- `ai-doctor`：宣言どおりになっているかを確かめる
+  - 本体：`claude`と`codex`が入っているか、Codexが`Brewfile`どおりHomebrewから入っているか
+  - 共通の指示と設定：全アカウントで`ai/`へのリンクになっているか
+  - プラグイン：宣言したものが全アカウントに入っているか、宣言にないものが入っていないか
+  - スキル：宣言したものが`~/.agents/skills/`と全アカウントの`skills/`にあるか、壊れたリンクがないか
+  - `✗`は問題、`⚠`は注意。問題があれば終了ステータス1で終わる
+  - 多くの問題は`./ai/install.sh`で直る
+- どちらも実体は`ai/update.sh`と`ai/doctor.sh`で、`ai.zsh`の関数から呼んでいる
+
+### 7.12 dotfilesの外から入ってくるスキル
 
 - dotfilesで管理していなくても、次のスキルは自動で入ってくる
   - **claude.aiのアカウントのスキル**
@@ -324,6 +408,8 @@ ai/plugins.txt ─(claude plugin install / codex plugin add)─▶ 各CLI × 各
     - 同じ名前のスキルが`~/.claude/skills/`にあるときは、そちらが`/名前`になる。同期された方は`/anthropic-skills:名前`で呼べる
   - **Claude Codeに最初から入っているスキル**：`/loop`、`/code-review`、`/simplify`など
   - **Codexに最初から入っているスキルとプラグイン**：imagegen、skill-creator、documentsなど
+    - `openai-primary-runtime`、`openai-bundled`、`openai-curated-remote`の配布元から自動で入る
+    - `ai-doctor`は、これらを「宣言にない」とは言わない
   - **Cursorが置いたスキル**
     - Cursorは`~/.agents/skills/`に自分のスキル（`canvas`、`babysit`など）を置いている
     - Codexも同じ場所を読むので、CodexにはCursor向けのスキルも見えている
@@ -333,25 +419,23 @@ ai/plugins.txt ─(claude plugin install / codex plugin add)─▶ 各CLI × 各
   - claude.aiのアカウントで有効にしたスキルだけが使える
   - そのため、dotfilesで入れたスキルはCoworkには出てこない
 
-### 7.9 よくある作業
+### 7.13 よくある作業
 
 - スキルを追加する
   - `ai/skills.txt`に1行足して`./ai/install.sh`を実行する
   - `docs/skills.md`にも追記する
 - スキルを削除する
   - `ai/skills.txt`から行を消して`./ai/install.sh`を実行する。リンクも片付く
+- プラグインを追加する
+  - `ai/plugins.txt`に1行足して`./ai/install.sh`を実行する
 - プラグインを削除する
   - `ai/plugins.txt`から行を消すだけでは消えない
   - `claude plugin uninstall <プラグイン>`や`codex plugin remove <プラグイン>`を、アカウントごとに実行する
-- 更新する
-  - `skills.txt`のスキル：`./ai/install.sh`を実行すると最新になる
-  - Claude Codeのプラグイン：`claude plugin update <プラグイン>`
-  - Codexのプラグイン：`codex plugin marketplace upgrade`
-- 入っているものを確認する
-  - `ls -l ~/.agents/skills`：共通の置き場所にあるスキル
-  - `ls -l ~/.claude/skills`：Claude Codeが読むスキル
-  - `claude plugin list`、`codex plugin list`：プラグイン
-  - 内容の説明は[skills.md](skills.md)
+  - 消し忘れは`ai-doctor`が「plugins.txt にありません」と教えてくれる
+- 全部を最新にする：`ai-update`
+- 状態を確かめる：`ai-doctor`
+- 共通の指示や許可のルールを変える
+  - `ai/AGENTS.md`や`ai/claude/settings.json`を編集してコミットする。リンクなのですぐに反映される
 
 ## 8. Gitに入れないもの
 
@@ -365,6 +449,7 @@ ai/plugins.txt ─(claude plugin install / codex plugin add)─▶ 各CLI × 各
 | `~/.ssh/id_*` | SSHの鍵 |
 | `~/.claude`、`~/.codex`、`~/.ai/` | AIのログイン情報、履歴、プラグインの実体 |
 | `~/.local/share/dotfiles/skill-repos/` | `skills.txt`で取得したスキルの実体 |
+| 各リポジトリの`.claude/settings.local.json` | プロジェクト専用の許可のルール |
 
 - 会社のアカウントで作ったスキル（採用基準や議事録のフォーマットなど）も、このリポジトリには入れない
 
@@ -376,5 +461,7 @@ ai/plugins.txt ─(claude plugin install / codex plugin add)─▶ 各CLI × 各
   - どちらが使われるかは、そのときの説明文との一致具合で決まる。気になったら片方を外す
 - Superpowersの`using-superpowers`は、会話を始めるたびにスキルを使うよう強く促す
   - 返答の進め方が変わるので、合わなければ`plugins.txt`から外す
-- 新しく作ったCodexのアカウントには、最初は`openai-curated`の配布元がない
-  - 一度そのアカウントで`codex`を起動してから、`./ai/install.sh`を再実行する
+- Codexの`openai-curated-remote`にあるプラグインは、ChatGPTにログインしていないアカウントには入れられない
+  - 同じものが`claude-plugins-official`にあれば、そちらを`plugins.txt`に書く
+- `.env.*`の読み取りを禁止しているので、`.env.example`も読めない
+  - 読ませたいときは、そのプロジェクトの`.claude/settings.local.json`で許可する

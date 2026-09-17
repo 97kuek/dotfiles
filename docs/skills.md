@@ -61,7 +61,7 @@
 #### Superpowers
 
 - 配布元：[obra/superpowers](https://github.com/obra/superpowers)
-- 対象：Claude Code（`claude-plugins-official`）、Codex（`openai-curated`）
+- 対象：Claude Code、Codex（どちらも`claude-plugins-official`から入れる）
 - 設計→計画→実装→レビューを、決まった手順で進めるためのスキル集
 - すべて自動で呼ばれる。Claude Codeでは`/superpowers:名前`
 

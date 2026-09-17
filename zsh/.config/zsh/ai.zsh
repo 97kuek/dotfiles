@@ -13,6 +13,8 @@
 #   typeset -gA AI_TOOLS=(claude CLAUDE_CONFIG_DIR codex CODEX_HOME gemini GEMINI_DIR)
 
 : ${AI_HOME:=$HOME/.ai}
+# The dotfiles checkout that holds ai/install.sh, found through this file's symlink.
+: ${AI_DOTFILES:=${${(%):-%x}:A:h:h:h:h}}
 : ${AI_DEFAULT_PROFILE:=personal}
 : ${AI_DEFAULT_TOOL:=claude}
 
@@ -131,7 +133,7 @@ ai-new() {
   done
   _ai_define_shorthands "$profile"
   print -r -- "created $AI_HOME/$profile — start it with ${AI_DEFAULT_TOOL}-${profile} and log in"
-  print -r -- "then run ~/dotfiles/ai/install.sh to add the plugins and skills to it"
+  print -r -- "then run $AI_DOTFILES/ai/install.sh to add the plugins, skills and settings to it"
 }
 
 # ai-ls — list the profiles and where each tool stores its account.
@@ -145,6 +147,16 @@ ai-ls() {
       print -r -- "    $tool  $(_ai_dir "$profile" "$tool")"
     done
   done
+}
+
+# ai-update — update Claude Code, Codex, their plugins and the skills in every profile.
+ai-update() {
+  sh "$AI_DOTFILES/ai/update.sh" "$@"
+}
+
+# ai-doctor — check that every profile matches what the dotfiles declare.
+ai-doctor() {
+  sh "$AI_DOTFILES/ai/doctor.sh" "$@"
 }
 
 _ai_define_shorthands ${(f)"$(_ai_profiles)"}

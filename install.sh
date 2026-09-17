@@ -12,6 +12,13 @@ fi
 echo "[1/5] Homebrewパッケージをインストールします。"
 brew bundle --file="$DOTFILES_DIR/Brewfile"
 
+# Claude Codeは自動更新される公式インストーラーで入れる。Codexは Brewfile の cask で入る。
+export PATH="$HOME/.local/bin:$PATH"
+if ! command -v claude >/dev/null 2>&1; then
+  echo "  Claude Codeをインストールします。"
+  curl -fsSL https://claude.ai/install.sh | bash
+fi
+
 echo "[2/5] ローカル設定の保存先を用意します。"
 mkdir -p "$HOME/.config/zsh/local"
 touch "$HOME/.gitconfig.local"
@@ -36,7 +43,7 @@ stow --restow --target="$HOME" $PACKAGES
 
 # AIのCLIは実行時の状態（履歴・セッション・ログ）を設定と同じ場所に書くため、
 # ~/.claude と ~/.codex をstowの管理対象にはしない。宣言したものだけを ai/install.sh が入れる。
-echo "[5/5] ClaudeとCodexのプラグインとスキルを導入します。"
+echo "[5/5] ClaudeとCodexのプラグイン、スキル、共通の設定を導入します。"
 sh "$DOTFILES_DIR/ai/install.sh"
 
 echo "セットアップが完了しました。新しいシェルは 'exec zsh' で開始できます。"
