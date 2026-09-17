@@ -145,6 +145,8 @@ is_managed_link() {
 # $2 に $1 へのリンクを作る。自分が作った古いリンクは張り替え、実体や他人のリンクは上書きしない。
 link_path() {
   if [ -L "$2" ] || [ -e "$2" ]; then
+    # -ef はPOSIX 2024で標準になり、macOSの /bin/sh でも使える。古いshellcheckは未定義として警告する。
+    # shellcheck disable=SC3013
     [ "$2" -ef "$1" ] && return 0
     if is_managed_link "$2"; then
       rm "$2"

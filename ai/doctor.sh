@@ -35,6 +35,8 @@ section() {
 
 # $2 が $1 を指すリンクになっているか。
 check_link() {
+  # -ef はPOSIX 2024で標準になり、macOSの /bin/sh でも使える。古いshellcheckは未定義として警告する。
+  # shellcheck disable=SC3013
   if [ "$2" -ef "$1" ]; then
     ok "$3"
   elif [ -L "$2" ] && [ ! -e "$2" ]; then
