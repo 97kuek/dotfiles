@@ -4,9 +4,9 @@
 
 ## このリポジトリでできること
 
-- **設定ファイルをまとめて管理する**：zsh、Git、SSH、Starship、Ghosttyの設定を`~`にリンクする
-- **ツールとアプリを入れる**：`Brewfile`に書いたものをHomebrewでまとめて入れる
-- **AIコーディングエージェントを揃える**：Claude CodeとCodexの本体、共通の指示、設定、プラグイン、スキルを入れる
+- **設定ファイルをまとめて管理する**：zsh、Git、SSH、Starship、Ghostty、VS Codeの設定を`~`にリンクする
+- **ツールとアプリを入れる**：`Brewfile`に書いたCLI、アプリ、VS Codeの拡張機能をHomebrewでまとめて入れる
+- **AIコーディングエージェントを揃える**：Claude CodeとCodexの本体、共通の指示、設定、プラグイン、MCPサーバー、スキルを入れる
 - **何度実行しても安全**：入っているものは飛ばし、足りないものだけを入れる。既存のファイルは上書きしない
 
 ## セットアップ
@@ -63,11 +63,14 @@ codex     # 起動したら画面の案内に従う
 | SSHの接続先 | `ssh/.ssh/config`（公開したくないものは`~/.ssh/config.d/*.conf`） | すぐに反映される |
 | プロンプトの見た目 | `starship/.config/starship.toml` | すぐに反映される |
 | ターミナルの見た目やキー | `ghostty/.config/ghostty/config.ghostty` | Ghosttyで`⌘⇧,` |
-| ツールやアプリを追加する | `Brewfile` | `./install.sh` |
+| VS Codeの設定やキー | `vscode/Library/Application Support/Code/User/`の`settings.json`、`keybindings.json` | すぐに反映される |
+| ツール、アプリ、VS Codeの拡張機能を追加する | `Brewfile` | `./install.sh` |
 | ClaudeとCodexへの共通の指示 | `ai/AGENTS.md` | 次に起動したセッションから |
 | Claude Codeの設定や許可のルール | `ai/claude/settings.json` | `./ai/install.sh` |
 | スキルを追加・削除する | `ai/skills.txt` | `./ai/install.sh` |
 | プラグインを追加する | `ai/plugins.txt` | `./ai/install.sh` |
+| MCPサーバーを追加する | `ai/mcp.txt` | `./ai/install.sh` |
+| シェルスクリプトを直す | `install.sh`、`ai/*.sh` | push前に`shellcheck install.sh ai/*.sh`。pushするとGitHub Actionsでも確かめる |
 
 ## ドキュメント
 
@@ -83,3 +86,4 @@ codex     # 起動したら画面の案内に従う
   - `~/.config/zsh/local/`や`~/.ssh/config.d/`など、Gitの外に置く場所を用意している
 - このリポジトリは公開されている
   - 会社のアカウントで作ったスキルや、社外に出せない情報も入れない
+  - ライセンスはMIT（[LICENSE](LICENSE)）

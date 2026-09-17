@@ -13,8 +13,8 @@
 
 | 種類 | 例 | 書いてある場所 | 揃える方法 |
 | --- | --- | --- | --- |
-| 設定ファイル | `.zshrc`、`.gitconfig` | `zsh/`、`git/`など | GNU Stowで`~`にリンクする |
-| ツールとアプリ | starship、Ghostty、Codex | `Brewfile` | Homebrewで入れる |
+| 設定ファイル | `.zshrc`、`.gitconfig`、VS Codeの`settings.json` | `zsh/`、`git/`、`vscode/`など | GNU Stowで`~`にリンクする |
+| ツールとアプリ | starship、Ghostty、Codex、VS Codeの拡張機能 | `Brewfile` | Homebrewで入れる |
 | AIコーディングエージェント | 共通の指示、スキル | `ai/` | `ai/install.sh`がリンクやコマンドで入れる |
 
 - `install.sh`は何度実行しても同じ結果になる
@@ -26,15 +26,19 @@
 ```
 dotfiles/
 ├── install.sh          ← セットアップの入口
-├── Brewfile            ← Homebrewで入れるツールとアプリ
+├── Brewfile            ← Homebrewで入れるツール、アプリ、VS Codeの拡張機能
 ├── README.md           ← 使い方
+├── LICENSE             ← MIT
 ├── docs/               ← このドキュメントなど
+├── .github/workflows/  ← pushしたときにシェルスクリプトをshellcheckで確かめる
+├── .shellcheckrc       ← shellcheckの設定
 │
 ├── zsh/                ┐
-├── git/                │  設定ファイル
-├── starship/           │  （Stowのパッケージ。中身がそのまま ~ にリンクされる）
-├── ghostty/            │
-├── ssh/                ┘
+├── git/                │
+├── starship/           │  設定ファイル
+├── ghostty/            │  （Stowのパッケージ。中身がそのまま ~ にリンクされる）
+├── ssh/                │
+├── vscode/             ┘
 │
 └── ai/                 ← Claude CodeとCodex（詳しくは ai.md）
 ```
@@ -109,6 +113,8 @@ dotfiles/starship/.config/starship.toml  →  ~/.config/starship.toml
 | starship | `starship/.config/starship.toml` | `~/.config/starship.toml` |
 | ghostty | `ghostty/.config/ghostty/config.ghostty` | `~/.config/ghostty/config.ghostty` |
 | ssh | `ssh/.ssh/config` | `~/.ssh/config` |
+| vscode | `vscode/Library/Application Support/Code/User/settings.json` | `~/Library/Application Support/Code/User/settings.json` |
+| | `vscode/Library/Application Support/Code/User/keybindings.json` | `~/Library/Application Support/Code/User/keybindings.json` |
 
 ## 4. ツールとアプリ：Homebrew
 
@@ -122,13 +128,25 @@ cask "ghostty"    # GUIアプリ
 
 - `brew bundle`を実行すると、このリストのうち、まだ入っていないものだけが入る
 - 入れているもの
-  - **開発ツール**：gh、jq、node、pyenv、uv、volta、stow、tmux、cocoapods
-  - **シェル**：starship、zsh-autosuggestions、zsh-syntax-highlighting
-  - **AIのCLI**：Codex
-  - **GUIアプリ**：Ghostty、Android Studio、Flutter、MacTeX、CodexBar
+
+| 種類 | 中身 |
+| --- | --- |
+| 言語とパッケージ管理 | go、node、volta、pyenv、uv、poetry、cocoapods |
+| ビルドと開発ツール | cmake、ninja、llvm、gh、jq、shellcheck、stow、tmux、wget |
+| そのほかのCLI | azure-cli、gcloud-cli、libpq、ffmpeg、plantuml、ollama |
+| シェル | starship、zsh-autosuggestions、zsh-syntax-highlighting |
+| AI | Codex、Claude、ChatGPT、CodexBar |
+| アプリ | Ghostty、VS Code、Android Studio、Flutter、MacTeX、Docker、Chrome、Slack、Zoom、Raycast、draw.io、AppCleaner、Aqua Voice、Capsomnia、Logi Options+ |
+| VS Codeの拡張機能 | 使っているもの全部（`vscode "…"`の行） |
+
 - 入れていないもの
   - **zsh**：macOS標準の`/bin/zsh`を使う。Homebrewで入れても使われない2つ目のzshが増えるだけ
   - **Claude Code**：Homebrewで入れると自動で更新されないので、公式のインストーラーで入れる
+  - **組織の端末管理（MDM）が入れたアプリ**：Company Portal、Microsoft Defender、Teams。二重に管理すると衝突する
+  - **App Storeから入れたアプリ**：Office、Bitwarden、LINE、Kindle、Xcodeなど。Apple IDでのログインが前提になる
+- 手で入れたアプリをHomebrewの管理に移すときは、`brew install --cask --adopt <名前>`を使う
+  - アプリを入れ直さずに、Homebrewの管理に移せる。管理者のパスワードを聞かれる
+- VS Codeの拡張機能を増やしたときは、`code --list-extensions`の結果に合わせて`Brewfile`に`vscode "…"`を足す
 
 ## 5. 各設定の中身
 
@@ -145,7 +163,7 @@ cask "ghostty"    # GUIアプリ
   ├ SDKROOT を設定                     … clangdやclang-tidyがmacOSのSDKを見つけられるようにする
   └ config.zsh
        ├ LANG、EDITOR                   … nvimがあればnvim、なければvim
-       ├ pyenv                          … Pythonのバージョン切り替え（入っているときだけ）
+       ├ pyenv                          … Pythonのバージョン切り替え（入っているときだけ。下で説明）
        ├ Volta                          … Nodeのバージョン切り替え（入っているときだけ）
        ├ Starship                       … プロンプト
        ├ autosuggestions、syntax-highlighting
@@ -156,6 +174,11 @@ cask "ghostty"    # GUIアプリ
        └ ai.zsh                         … AIのアカウント切り替え（ai.mdで説明）
 ```
 
+- pyenvは遅く読み込む
+  - `pyenv init`はzshの起動時間の大半（約0.09秒）を占めていた
+  - 起動時はPATHにpyenvのshimsだけを足す。これだけで`python`は`.python-version`に従う
+  - `pyenv`コマンドを初めて使ったときに、`pyenv init`を実行する
+  - その結果、zshの起動は約0.12秒から約0.03秒になった
 - `local/*.zsh`を`ai.zsh`より先に読むのは、`ai.zsh`の設定を端末ごとに上書きできるようにするため
 - ツールのインストーラーが`.zshrc`の末尾に設定を書き足すことがある
   - そのときは`config.zsh`に移し、`command -v`で入っているか確かめてから読むようにする
@@ -227,6 +250,15 @@ cask "ghostty"    # GUIアプリ
   - `Ctrl+L`の画面クリア、`Ctrl+K`の行削除などは効かない
   - `keybind = performable:ctrl+l=goto_split:right`のように`performable:`を付けると、移動先の分割があるときだけGhosttyが受け取り、ないときはシェルに渡すようになる
 
+### 5.6 VS Code
+
+- `settings.json`と`keybindings.json`を管理する
+  - LaTeX Workshop（LuaLaTeXでビルド）、日本語の文字を警告しない設定、ターミナルの設定など
+  - ターミナルで`Shift+Enter`を押すと改行を送る（Claude Codeで複数行を書くため）
+- 拡張機能は`Brewfile`の`vscode "…"`で入れる
+- VS Codeが設定を保存するときにリンクを実体のファイルで置き換えた場合は、`./install.sh`の競合の確認で止まる
+  - そのときは、実体のファイルの変更をdotfiles側に写してから、実体を退避して再実行する
+
 ## 6. Gitに入れないもの
 
 - 秘密情報と端末固有の設定は、リポジトリの外に置いて自動で読み込む
@@ -243,3 +275,12 @@ cask "ghostty"    # GUIアプリ
 
 - このリポジトリは公開されている
   - 会社のアカウントで作ったスキル（採用基準や議事録のフォーマットなど）も入れない
+
+## 7. シェルスクリプトのチェック
+
+- `install.sh`と`ai/*.sh`は、shellcheckで書き方の誤りを確かめる
+  - 手元：`shellcheck install.sh ai/*.sh`
+  - GitHub：pushすると、GitHub Actions（`.github/workflows/shellcheck.yml`）が同じチェックを実行する
+- 設定は`.shellcheckrc`にある
+  - `sh`として確かめる、`ai/lib.sh`の読み込みもたどる
+- `ai.zsh`などのzshのファイルは、shellcheckが対応していないので対象外

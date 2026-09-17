@@ -1,8 +1,9 @@
 #!/bin/sh
 set -eu
 
-DOTFILES_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-PACKAGES="zsh git starship ghostty ssh"
+DOTFILES_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+# Stowのパッケージ。1つずつの引数として渡すため、使うときはあえてクォートしない。
+PACKAGES="zsh git starship ghostty ssh vscode"
 
 if ! command -v brew >/dev/null 2>&1; then
   echo "エラー: Homebrewが必要です。https://brew.sh/ からインストールしてください。" >&2
@@ -29,6 +30,7 @@ echo "[3/5] 既存ファイルとの競合を確認します。"
 cd "$DOTFILES_DIR"
 # --simulate はリンクを作らずに競合だけを報告する。先に見せてから実行する。
 # 競合がなくても "in simulation mode" の警告は出るため、判定は終了ステータスで行う。
+# shellcheck disable=SC2086
 if ! conflicts=$(stow --simulate --restow --target="$HOME" $PACKAGES 2>&1); then
   echo "エラー: 以下のファイルがdotfilesと競合しています。" >&2
   echo "$conflicts" >&2
@@ -39,6 +41,7 @@ if ! conflicts=$(stow --simulate --restow --target="$HOME" $PACKAGES 2>&1); then
 fi
 
 echo "[4/5] dotfilesをホームディレクトリへリンクします。"
+# shellcheck disable=SC2086
 stow --restow --target="$HOME" $PACKAGES
 
 # AIのCLIは実行時の状態（履歴・セッション・ログ）を設定と同じ場所に書くため、

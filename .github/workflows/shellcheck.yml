@@ -1,0 +1,17 @@
+name: shellcheck
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # ubuntu-latest には shellcheck が入っている。設定は .shellcheckrc にある。
+      - run: shellcheck --version
+      - run: shellcheck install.sh ai/*.sh

@@ -5,10 +5,17 @@ else
   export EDITOR=vim
 fi
 
-# Python versions. Shims go ahead of Homebrew so the selected version wins.
+# Python versions. The shims alone make python follow .python-version, so the
+# slow `pyenv init` (most of the shell startup time) only runs the first time
+# the pyenv command itself is used.
 if command -v pyenv >/dev/null 2>&1; then
   export PYENV_ROOT="$HOME/.pyenv"
-  eval "$(pyenv init - zsh)"
+  export PATH="$PYENV_ROOT/shims:$PATH"
+  pyenv() {
+    unfunction pyenv
+    eval "$(command pyenv init - zsh)"
+    pyenv "$@"
+  }
 fi
 
 # Node toolchains. Volta's shims pick the version pinned by each project.
