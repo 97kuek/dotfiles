@@ -27,13 +27,6 @@ typeset -gA AI_TOOLS
   codex  CODEX_HOME
 )
 
-# command -> files symlinked from the default profile, so shared settings do
-# not drift between accounts. Space separated.
-typeset -gA AI_SHARED_FILES
-(( ${#AI_SHARED_FILES} )) || AI_SHARED_FILES=(
-  claude 'settings.json'
-)
-
 _ai_dir() {
   local profile=$1 tool=$2
   if [[ $profile == $AI_DEFAULT_PROFILE ]]; then
@@ -57,16 +50,8 @@ _ai_profiles() {
   print -rl -- ${(u)found}
 }
 
-_ai_link_shared() {
-  local file=$1 from=$2/$1 to=$3/$1
-  [[ $from == $to ]] && return 0
-  [[ -e $to || -L $to ]] && return 0
-  [[ -f $from ]] || return 0
-  ln -s -- "$from" "$to"
-}
-
 _ai_activate() {
-  local profile=$1 tool dir file
+  local profile=$1 tool dir
   local -a tools=(${(f)"$(_ai_profile_tools "$profile")"})
   for tool in ${(k)AI_TOOLS}; do
     # A tool without an account in this profile falls back to the default one.
@@ -77,9 +62,6 @@ _ai_activate() {
     dir=$(_ai_dir "$profile" "$tool")
     [[ -d $dir ]] || mkdir -p -- "$dir" || return 1
     export ${AI_TOOLS[$tool]}="$dir"
-    for file in ${=AI_SHARED_FILES[$tool]}; do
-      _ai_link_shared "$file" "$(_ai_dir "$AI_DEFAULT_PROFILE" "$tool")" "$dir"
-    done
   done
   # Only a non-default profile is worth showing in the prompt.
   if [[ $profile == $AI_DEFAULT_PROFILE ]]; then

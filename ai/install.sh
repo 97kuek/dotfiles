@@ -129,10 +129,20 @@ link_instructions() {
   done
 }
 
-# Claude Codeの設定を、各アカウントにリンクする。
-link_claude_settings() {
+# Claude Codeの設定を、各アカウントの settings.json に重ねて書き込む。
+# リンクにしないのは、Claude Codeが設定を保存するときにリンクを実体のファイルで置き換えるため。
+apply_claude_settings() {
   config_dirs claude | while read -r dir; do
-    link_path "$AI_DIR/claude/settings.json" "$dir/settings.json"
+    dest="$dir/settings.json"
+    claude_settings_in_sync "$dest" && continue
+    merged=$(merged_claude_settings "$dest") || {
+      warn "$dest を読めませんでした。JSONとして正しいか確認してください。"
+      continue
+    }
+    # 以前のリンク方式の名残りは、リンクをやめて実体にする。
+    [ -L "$dest" ] && rm "$dest"
+    printf '%s\n' "$merged" >"$dest"
+    echo "  設定: $dest"
   done
 }
 
@@ -147,6 +157,6 @@ else
 fi
 link_skills_to_claude
 
-echo "共通の指示とClaude Codeの設定をリンクします。"
+echo "共通の指示とClaude Codeの設定を反映します。"
 link_instructions
-link_claude_settings
+apply_claude_settings

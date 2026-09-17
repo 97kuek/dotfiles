@@ -20,7 +20,7 @@
 | --- | --- | --- | --- |
 | 本体 | `Brewfile`（Codex）、`install.sh`（Claude Code） | `/opt/homebrew/bin/codex`、`~/.local/bin/claude` | このMac |
 | 共通の指示 | `ai/AGENTS.md` | 各アカウントの`CLAUDE.md`、`AGENTS.md` | 両方の全アカウント |
-| Claude Codeの設定 | `ai/claude/settings.json` | 各アカウントの`settings.json` | Claude Codeの全アカウント |
+| Claude Codeの設定 | `ai/claude/settings.json` | 各アカウントの`settings.json`（リンクではなく、内容を書き込む） | Claude Codeの全アカウント |
 | プラグイン | `ai/plugins.txt`、`ai/marketplaces.txt` | 各アカウントの`plugins/` | 両方の全アカウント |
 | スキル（GitHubから） | `ai/skills.txt` | `~/.agents/skills/`、各アカウントの`skills/` | 両方の全アカウント |
 | スキル（自作） | `ai/skills/<名前>/` | 同上 | 両方の全アカウント |
@@ -42,8 +42,8 @@
 
 - `ai-doctor`の表示
   - `✓`：宣言どおり
-  - `✗`：問題あり。多くは`./ai/install.sh`で直る
-  - `⚠`：注意。宣言にないプラグインが入っている、Claude Codeが設定を書き換えた、など
+  - `✗`：問題あり。Claude Codeの設定がdotfilesと違う、スキルが足りない、など。多くは`./ai/install.sh`で直る
+  - `⚠`：注意。宣言にないプラグインが入っている、など
   - `・`：参考情報。他のツールが置いたスキルなど
 
 ### 3.2 アカウント
@@ -91,9 +91,12 @@
 
 ### Claude Codeの許可のルールを変える
 
-- どのプロジェクトでも使うもの → `ai/claude/settings.json`を編集する
+- どのプロジェクトでも使うもの → `ai/claude/settings.json`を編集して、`./ai/install.sh`
 - そのプロジェクトだけのもの → そのリポジトリの`.claude/settings.local.json`に書く
-- Claude Codeが設定を書き換えたときは、`git diff ai/claude/settings.json`で見て、残すか戻すかを決める
+- `/config`などで変えた設定を残したいとき
+  1. `ai-doctor`で「違うキー」を見る
+  2. 残したいものは`ai/claude/settings.json`にも書く
+  3. `./ai/install.sh`を実行する。`ai/claude/settings.json`にない変更は、ここで元に戻る
 
 ### アカウントを作る
 
@@ -162,7 +165,11 @@ neoai              ~/.ai/neoai/claude  （なし → Codexは既定のアカウ�
 
 ### 5.5 Claude Codeの設定と許可のルール
 
-- `ai/claude/settings.json`を、全アカウントの`settings.json`にリンクする
+- `ai/claude/settings.json`の内容を、全アカウントの`settings.json`に書き込む
+  - **リンクにしない理由**：Claude Codeは設定を保存するとき、リンクを残さず、ファイルごと置き換える。リンクにしても、いつの間にか普通のファイルになり、dotfiles側の変更が届かなくなる
+  - **書き込み方**：今の`settings.json`に、dotfilesの設定を重ねる
+    - dotfilesに書いたキーは、dotfilesの値になる。配列（許可のルールなど）は丸ごと置き換わる
+    - dotfilesに書いていないキー（Claude Codeが自分で足したものなど）は残る
 - 入れている設定
   - 見た目：モデル、テーマ、全画面表示、通知
   - 有効にするプラグインと、その配布元
@@ -178,9 +185,9 @@ neoai              ~/.ai/neoai/claude  （なし → Codexは既定のアカウ�
 - denyの限界
   - Claudeのファイル操作と、`cat`などの分かりやすいコマンドには効く
   - PythonやNodeのスクリプトが中で開くファイルまでは防げない
-- Claude Codeは、このファイルを自分で書き換えることがある
+- Claude Codeは、`settings.json`を自分で書き換えることがある
   - プラグインの有効化、`/config`での変更、「次回から聞かない」を選んだときなど
-  - リンクなので、その変更はdotfilesの差分に出る
+  - dotfilesに書いたキーが変わると、`ai-doctor`が「違うキー」として教えてくれる
 - 移行前の設定は`~/.claude/settings.json.before-dotfiles`に残している
 
 ### 5.6 スキルとプラグインの届け方
@@ -214,7 +221,7 @@ ai/plugins.txt ─(claude plugin install / codex plugin add)─▶ 各CLI × 各
 
 【共通の指示と設定】
 ai/AGENTS.md ─────────────▶ 各アカウントの CLAUDE.md、AGENTS.md
-ai/claude/settings.json ──▶ Claude Codeの各アカウントの settings.json
+ai/claude/settings.json ──(内容を重ねて書き込む)──▶ Claude Codeの各アカウントの settings.json
 ```
 
 - スキルは`~/.agents/skills/`に集める
@@ -244,7 +251,8 @@ ai/claude/settings.json ──▶ Claude Codeの各アカウントの settings.j
 3. **Claude Codeへ配る**
    - 宣言したスキルを、Claude Codeの全アカウントの`skills/`にリンクする
 4. **共通の指示と設定をリンクする**
-   - `ai/AGENTS.md`と`ai/claude/settings.json`を、全アカウントにリンクする
+   - `ai/AGENTS.md`を、全アカウントの`CLAUDE.md`と`AGENTS.md`にリンクする
+   - `ai/claude/settings.json`の内容を、Claude Codeの全アカウントの`settings.json`に重ねて書き込む
 
 - 安全のための決まり
   - 宣言から消したスキルのリンクは片付ける。ただし、消すのはこのdotfilesが作ったリンクだけ
@@ -259,7 +267,8 @@ ai/claude/settings.json ──▶ Claude Codeの各アカウントの settings.j
   3. スキル：`ai/install.sh`を実行する
 - `ai-doctor`（`ai/doctor.sh`）
   - 本体：`claude`と`codex`があるか、CodexがHomebrewから入っているか
-  - 共通の指示と設定：全アカウントで`ai/`へのリンクになっているか
+  - 共通の指示：全アカウントで`ai/AGENTS.md`へのリンクになっているか
+  - Claude Codeの設定：`ai/claude/settings.json`の内容が入っているか。違うときは、違うキーを表示する
   - プラグイン：宣言したものが入っているか、宣言にないものが入っていないか
   - スキル：宣言したものが`~/.agents/skills/`とClaude Codeの全アカウントにあるか、壊れたリンクがないか
   - 問題があれば、終了ステータス1で終わる

@@ -18,7 +18,8 @@ Claude CodeとCodexが、すべてのプロジェクトで最初に読む指示�
 
 ## 設定ファイル
 
-- `~/.zshrc`、`~/.gitconfig`、`~/.claude/settings.json`などは`~/dotfiles`へのシンボリックリンク
+- `~/.zshrc`、`~/.gitconfig`、`~/.claude/CLAUDE.md`などは`~/dotfiles`へのシンボリックリンク
+- Claude Codeの`settings.json`は、`~/dotfiles/ai/claude/settings.json`の内容を`~/dotfiles/ai/install.sh`で書き込んだもの
 - 設定を変えるときは、リンク先ではなく`~/dotfiles`側のファイルを編集する
 - 秘密情報や端末固有の設定は`~/.config/zsh/local/*.zsh`に置き、Gitに入れない
 

@@ -148,6 +148,25 @@ declared_skills() {
 
 # --- 共通の指示と設定 --------------------------------------------------------
 
+# Claude Codeの設定のうち、dotfilesで管理する部分。
+CLAUDE_SETTINGS="$AI_DIR/claude/settings.json"
+
+# $1 の settings.json に、dotfilesの設定を重ねた内容を出す。
+# dotfilesに書いたキーはdotfilesの値になり、Claude Codeが足したキーは残る。配列は丸ごと置き換わる。
+merged_claude_settings() {
+  if [ -s "$1" ]; then
+    jq -s '.[0] * .[1]' "$1" "$CLAUDE_SETTINGS"
+  else
+    jq . "$CLAUDE_SETTINGS"
+  fi
+}
+
+# $1 の settings.json が、dotfilesの設定をすべて含んでいるか。
+claude_settings_in_sync() {
+  [ -f "$1" ] && [ ! -L "$1" ] &&
+    [ "$(merged_claude_settings "$1" | jq -S .)" = "$(jq -S . "$1")" ]
+}
+
 # CLIごとの、共通の指示ファイルのファイル名。
 instructions_name() {
   case $1 in

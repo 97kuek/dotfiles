@@ -79,12 +79,23 @@ done
 
 section "Claude Codeの設定（ai/claude/settings.json）"
 for dir in $(config_dirs claude); do
-  check_link "$AI_DIR/claude/settings.json" "$dir/settings.json" \
-    "$(account_label claude "$dir")  $(tilde "$dir")/settings.json"
+  dest="$dir/settings.json"
+  label="$(account_label claude "$dir")  $(tilde "$dest")"
+  if claude_settings_in_sync "$dest"; then
+    ok "$label"
+  elif [ -L "$dest" ]; then
+    ng "$label がリンクのままです（今はリンクにせず、内容を書き込みます）"
+  elif [ ! -f "$dest" ]; then
+    ng "$label がありません"
+  else
+    ng "$label がdotfilesの設定と違います"
+    # dotfilesに書いたキーのうち、値が違うもの。/config などで変えたときに出る。
+    jq -r -n --slurpfile a "$dest" --slurpfile b "$CLAUDE_SETTINGS" '
+      $b[0] | paths(type != "object") | select(all(.[]; type == "string")) as $p
+      | select(($a[0] | getpath($p)) != ($b[0] | getpath($p)))
+      | "      違うキー: " + ($p | join("."))' 2>/dev/null
+  fi
 done
-if ! git -C "$DOTFILES_DIR" diff --quiet -- ai/claude/settings.json 2>/dev/null; then
-  note "Claude Codeが設定を書き換えています。git diff ai/claude/settings.json で確認してください"
-fi
 
 section "プラグイン（ai/plugins.txt）"
 for cli in $AI_CLIS; do

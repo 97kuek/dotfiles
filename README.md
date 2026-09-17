@@ -65,7 +65,7 @@ codex     # 起動したら画面の案内に従う
 | ターミナルの見た目やキー | `ghostty/.config/ghostty/config.ghostty` | Ghosttyで`⌘⇧,` |
 | ツールやアプリを追加する | `Brewfile` | `./install.sh` |
 | ClaudeとCodexへの共通の指示 | `ai/AGENTS.md` | 次に起動したセッションから |
-| Claude Codeの設定や許可のルール | `ai/claude/settings.json` | すぐに反映される |
+| Claude Codeの設定や許可のルール | `ai/claude/settings.json` | `./ai/install.sh` |
 | スキルを追加・削除する | `ai/skills.txt` | `./ai/install.sh` |
 | プラグインを追加する | `ai/plugins.txt` | `./ai/install.sh` |
 
