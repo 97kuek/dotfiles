@@ -3,6 +3,7 @@
 # 問題があれば終了ステータス1で終わる。
 set -u
 
+# shellcheck source=lib.sh
 . "$(dirname -- "$0")/lib.sh"
 
 problems=$(mktemp)
@@ -120,6 +121,25 @@ for cli in $AI_CLIS; do
       printf '%s\n' "$declared" | grep -qxF "$plugin" ||
         note "$label  $plugin は plugins.txt にありません"
     done
+  done
+done
+
+section "MCPサーバー（ai/mcp.txt）"
+for cli in $AI_CLIS; do
+  command -v "$cli" >/dev/null 2>&1 || continue
+  for dir in $(config_dirs "$cli"); do
+    label=$(account_label "$cli" "$dir")
+    total=0
+    count=0
+    for name in $(declared_mcp_servers | awk '{ print $1 }'); do
+      total=$((total + 1))
+      if has_mcp_server "$cli" "$dir" "$name"; then
+        count=$((count + 1))
+      else
+        ng "$label  $name が登録されていません"
+      fi
+    done
+    [ "$count" -eq "$total" ] && ok "$label  宣言した $total 個がすべて登録されています"
   done
 done
 

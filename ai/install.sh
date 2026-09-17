@@ -3,6 +3,7 @@
 # ../install.sh から呼ばれるほか、AIまわりだけを入れ直したいときは単独で実行できる。
 set -eu
 
+# shellcheck source=lib.sh
 . "$(dirname -- "$0")/lib.sh"
 
 # --- プラグイン --------------------------------------------------------------
@@ -46,6 +47,32 @@ install_plugins() {
           echo "  $label: $plugin を導入しました。"
         else
           warn "$label への $plugin の導入に失敗しました。配布元が登録されているか確認してください。"
+        fi
+      done
+    done
+  done
+}
+
+# --- MCPサーバー -------------------------------------------------------------
+
+# mcp.txt のMCPサーバーを、CLIごと・アカウントごとに登録する。
+install_mcp_servers() {
+  for cli in $AI_CLIS; do
+    command -v "$cli" >/dev/null 2>&1 || continue
+    config_dirs "$cli" | while read -r dir; do
+      label=$(account_label "$cli" "$dir")
+      declared_mcp_servers | while read -r name command; do
+        has_mcp_server "$cli" "$dir" "$name" && continue
+        case $cli in
+          claude) set -- mcp add -s user "$name" -- ;;
+          codex) set -- mcp add "$name" -- ;;
+        esac
+        # コマンドと引数に分けるため、$command はあえてクォートしない。
+        # shellcheck disable=SC2086
+        if run_cli "$cli" "$dir" "$@" $command >/dev/null 2>&1; then
+          echo "  $label: MCPサーバー $name を登録しました。"
+        else
+          warn "$label へのMCPサーバー $name の登録に失敗しました。"
         fi
       done
     done
@@ -139,6 +166,11 @@ apply_claude_settings() {
       warn "$dest を読めませんでした。JSONとして正しいか確認してください。"
       continue
     }
+    dropped=$(dropped_claude_permissions "$dest")
+    if [ -n "$dropped" ]; then
+      warn "$dest の次の許可ルールは ai/claude/settings.json にないため消えます。残すなら ai/claude/settings.json に書いてください。"
+      printf '%s\n' "$dropped" | sed 's/^/    /' >&2
+    fi
     # 以前のリンク方式の名残りは、リンクをやめて実体にする。
     [ -L "$dest" ] && rm "$dest"
     printf '%s\n' "$merged" >"$dest"
@@ -148,6 +180,9 @@ apply_claude_settings() {
 
 echo "AIの外部プラグインを導入します。"
 install_plugins
+
+echo "MCPサーバーを登録します。"
+install_mcp_servers
 
 echo "AIのスキルを集めてリンクします。"
 if command -v git >/dev/null 2>&1; then

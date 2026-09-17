@@ -2,6 +2,7 @@
 # ClaudeとCodexの本体、プラグイン、スキルをまとめて最新にする。ai-update から呼ばれる。
 set -eu
 
+# shellcheck source=lib.sh
 . "$(dirname -- "$0")/lib.sh"
 
 echo "[1/3] ClaudeとCodexの本体を更新します。"

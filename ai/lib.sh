@@ -1,7 +1,9 @@
 # ai/install.sh、ai/update.sh、ai/doctor.sh が共通で使う変数と関数。
 # 単独では実行せず、各スクリプトから . で読み込む。
+# 変数は読み込んだ側で使うので、未使用の警告は出さない。
+# shellcheck disable=SC2034
 
-AI_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+AI_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 DOTFILES_DIR=$(dirname "$AI_DIR")
 AI_CLIS="claude codex"
 # ai-new で作ったアカウントの置き場所。zsh/.config/zsh/ai.zsh と揃える。
@@ -87,10 +89,11 @@ installed_plugins() {
   esac
 }
 
-# Codexが自動で入れるプラグインかどうか。宣言との比較から外す。
+# CLIが自動で入れるプラグインかどうか。宣言との比較から外す。
+# @synced はclaude.aiのアカウントから同期されたもの、openai-* はCodexに最初から入っているもの。
 is_builtin_plugin() {
   case $1 in
-    *@openai-primary-runtime | *@openai-bundled | *@openai-curated-remote) return 0 ;;
+    *@synced | *@openai-primary-runtime | *@openai-bundled | *@openai-curated-remote) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -101,6 +104,31 @@ declared_plugins() {
     targets_include "${clis:-}" "$1" && echo "$plugin"
   done
   return 0
+}
+
+# --- MCPサーバー -------------------------------------------------------------
+
+# mcp.txt で宣言したMCPサーバーを「名前 コマンド...」の形で1行ずつ出す。
+declared_mcp_servers() {
+  config_lines "$AI_DIR/mcp.txt"
+}
+
+# 指定したアカウントに、その名前のMCPサーバーが登録されているか。
+# Claude Codeの mcp get はサーバーを起動して接続まで試すので、設定ファイルを直接読む。
+has_mcp_server() {
+  case $1 in
+    claude)
+      if [ "$2" = "$HOME/.claude" ]; then
+        state="$HOME/.claude.json"
+      else
+        state="$2/.claude.json"
+      fi
+      [ -f "$state" ] && jq -e --arg n "$3" '.mcpServers[$n] != null' "$state" >/dev/null 2>&1
+      ;;
+    codex)
+      run_cli codex "$2" mcp list --json 2>/dev/null | jq -e --arg n "$3" 'any(.[]; .name == $n)' >/dev/null
+      ;;
+  esac
 }
 
 # --- リンク ------------------------------------------------------------------
@@ -137,7 +165,7 @@ link_path() {
 
 # ai/skills.txt と ai/skills/ で宣言したスキルの名前を1行ずつ出す。
 declared_skills() {
-  config_lines "$AI_DIR/skills.txt" | while read -r repo path; do
+  config_lines "$AI_DIR/skills.txt" | while read -r _ path; do
     basename "$path"
   done
   for skill in "$AI_DIR"/skills/*/; do
@@ -159,6 +187,18 @@ merged_claude_settings() {
   else
     jq . "$CLAUDE_SETTINGS"
   fi
+}
+
+# $1 の settings.json から、dotfilesの設定を重ねると消える許可ルールを1行ずつ出す。
+# 許可ルールは配列なので、重ねるとdotfilesの内容で丸ごと置き換わる。
+dropped_claude_permissions() {
+  [ -s "$1" ] || return 0
+  jq -r -n --slurpfile a "$1" --slurpfile b "$CLAUDE_SETTINGS" '
+    ($b[0].permissions // {}) as $new
+    | ($a[0].permissions // {}) | to_entries[]
+    | select(.value | type == "array") | select($new[.key] != null)
+    | .key as $kind | .value[] | select(. as $rule | $new[$kind] | index($rule) | not)
+    | "\($kind): \(.)"'
 }
 
 # $1 の settings.json が、dotfilesの設定をすべて含んでいるか。

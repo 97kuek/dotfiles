@@ -180,14 +180,7 @@
   - sites：Webサイトを作って公開する
   - visualize：図や表を会話の中で作る
 
-### 2.4 Cursorが置いたスキル
-
-- 場所：`~/.agents/skills/`（共通の置き場所と同じ）
-- Codexにも見えているが、Cursor向けの内容なのでClaude Codeにはリンクしていない
-- 元から入っていたものなので、消さずにそのままにしている
-- automate、babysit、canvas、create-hook、create-rule、create-skill、create-subagent、env-setup、loop、migrate-to-skills、onboard、review、review-bugbot、review-security、sdk、shell、split-to-prs、statusline、update-cli-config、update-cursor-settings
-
-### 2.5 Claude Desktopアプリ（Cowork）
+### 2.4 Claude Desktopアプリ（Cowork）
 
 - `~/.claude/skills/`を読まないので、dotfilesで入れたスキルは出てこない
 - ログインしているclaude.aiのアカウント（個人・会社）で有効にしたスキルだけが使える

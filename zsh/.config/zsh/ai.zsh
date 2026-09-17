@@ -54,8 +54,11 @@ _ai_activate() {
   local profile=$1 tool dir
   local -a tools=(${(f)"$(_ai_profile_tools "$profile")"})
   for tool in ${(k)AI_TOOLS}; do
-    # A tool without an account in this profile falls back to the default one.
-    if (( ! ${tools[(Ie)$tool]} )); then
+    # The default profile, and a tool without an account in this profile, use
+    # the CLI's own default. Setting the variable to that same directory is not
+    # equivalent: Claude Code then reads its state from $CLAUDE_CONFIG_DIR/.claude.json
+    # instead of ~/.claude.json and appears logged out.
+    if [[ $profile == $AI_DEFAULT_PROFILE ]] || (( ! ${tools[(Ie)$tool]} )); then
       unset ${AI_TOOLS[$tool]}
       continue
     fi

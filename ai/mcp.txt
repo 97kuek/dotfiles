@@ -1,0 +1,12 @@
+# ClaudeとCodexに登録するMCPサーバー。ai/install.sh が未登録のものだけを登録する。
+#
+# 形式: <名前>  <起動するコマンドと引数>
+#   Claude Codeの全アカウント（user スコープ）とCodexに、同じコマンドで登録する。
+#
+# このリポジトリは公開されている。APIキーなどが必要なサーバーはここに書かず、
+# 各CLIで直接登録する。
+# 登録を外すときは、行を消したあとに claude mcp remove -s user <名前> / codex mcp remove <名前>。
+#
+# #から行末まではコメント。空行は無視される。
+
+drawio  npx -y @drawio/mcp    # draw.ioの図を作る・開く

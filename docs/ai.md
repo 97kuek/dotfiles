@@ -24,6 +24,7 @@
 | プラグイン | `ai/plugins.txt`、`ai/marketplaces.txt` | 各アカウントの`plugins/` | 両方の全アカウント |
 | スキル（GitHubから） | `ai/skills.txt` | `~/.agents/skills/`、各アカウントの`skills/` | 両方の全アカウント |
 | スキル（自作） | `ai/skills/<名前>/` | 同上 | 両方の全アカウント |
+| MCPサーバー | `ai/mcp.txt` | Claude Codeの各アカウントの`.claude.json`、Codexの`config.toml` | 両方の全アカウント |
 | アカウントの切り替え | `zsh/.config/zsh/ai.zsh` | シェルのコマンド | このMac |
 
 - 今あるアカウント
@@ -82,6 +83,15 @@
   - Codex：`codex plugin remove <プラグイン>`
 - 消し忘れは、`ai-doctor`が「plugins.txt にありません」と教えてくれる
 
+### MCPサーバーを追加する・外す
+
+- 追加する：`ai/mcp.txt`に`<名前> <起動するコマンドと引数>`を1行足して、`./ai/install.sh`
+  - Claude Codeの全アカウントとCodexに、同じコマンドで登録される
+  - このリポジトリは公開されているので、APIキーなどが必要なサーバーは書かない。各CLIで直接登録する
+- 外す：行を消したあと、アカウントごとにコマンドで外す
+  - Claude Code：`claude mcp remove -s user <名前>`（別のアカウントは`ai neoai claude mcp remove -s user <名前>`）
+  - Codex：`codex mcp remove <名前>`
+
 ### 共通の指示を変える
 
 - `ai/AGENTS.md`を編集する
@@ -97,13 +107,14 @@
   1. `ai-doctor`で「違うキー」を見る
   2. 残したいものは`ai/claude/settings.json`にも書く
   3. `./ai/install.sh`を実行する。`ai/claude/settings.json`にない変更は、ここで元に戻る
+- `./ai/install.sh`は、消える許可ルールがあると、書き込む前に一覧を表示する（止まらずに進む）
 
 ### アカウントを作る
 
 1. `ai-new <名前> claude`（Codexも使うなら`ai-new <名前>`）
 2. `exec zsh`
 3. `claude-<名前>`で起動して、`/login`でログインする
-4. `./ai/install.sh`で、指示・設定・プラグイン・スキルを入れる
+4. `./ai/install.sh`で、指示・設定・プラグイン・MCPサーバー・スキルを入れる
 5. `ai-doctor`で確かめる
 
 ### アカウントを消す
@@ -178,17 +189,20 @@ neoai              ~/.ai/neoai/claude  （なし → Codexは既定のアカウ�
 
 | 種類 | 意味 | 入れているもの |
 | --- | --- | --- |
-| deny | 実行させない | 秘密情報の読み取り：SSHの鍵、`~/.config/zsh/local/*.zsh`、`.env`、`.env.*`、Codex・gh・gcloud・AWS・Docker・npmの認証情報 |
-| ask | allowに当たっても、必ず確認する | `git push --force`、`git reset --hard`、`git clean`、`sudo` |
-| allow | 確認せずに実行する | `~/`以下の読み取り、git、gh、uv、pytest、ruff、tsc、go testなど、どのプロジェクトでも使う安全なコマンド |
+| deny | 実行させない | 秘密情報の読み取り：SSHの鍵、`~/.config/zsh/local/*.zsh`（実体の`~/dotfiles/zsh/.config/zsh/local/*.zsh`も）、`.env`・`.env.local`・`.env.production`など、Codex・gh・gcloud・AWS・Docker・npmの認証情報 |
+| ask | allowに当たっても、必ず確認する | `git push`（すべて）、`git reset --hard`、`git clean`、`sudo` |
+| allow | 確認せずに実行する | `~/`以下の読み取り、git（pushを除く）、gh、uv pip・uv venv、pytest、ruff、ty、tsc、vite、go testなど |
 
+- 決めごと
+  - **pushは毎回確認する**：外に出る操作で、取り消しにくいため。`ai/AGENTS.md`の「pushは頼まれたときだけ」とも揃えている
+  - **何でも実行できる`uv run`と`go run`は許可しない**：中のコードがdenyをすり抜けて秘密情報を読めるため。テストや型チェックは許可している
+  - **`.env.example`などは読める**：denyは秘密情報が入るファイル名だけに絞っている
 - denyの限界
   - Claudeのファイル操作と、`cat`などの分かりやすいコマンドには効く
   - PythonやNodeのスクリプトが中で開くファイルまでは防げない
 - Claude Codeは、`settings.json`を自分で書き換えることがある
   - プラグインの有効化、`/config`での変更、「次回から聞かない」を選んだときなど
   - dotfilesに書いたキーが変わると、`ai-doctor`が「違うキー」として教えてくれる
-- 移行前の設定は`~/.claude/settings.json.before-dotfiles`に残している
 
 ### 5.6 スキルとプラグインの届け方
 
@@ -245,14 +259,16 @@ ai/claude/settings.json ──(内容を重ねて書き込む)──▶ Claude C
 1. **プラグイン**
    - 全アカウントで、`marketplaces.txt`の配布元を登録する
    - `plugins.txt`のプラグインのうち、入っていないものを入れる
-2. **スキルを集める**
+2. **MCPサーバー**
+   - 全アカウントに、`mcp.txt`のMCPサーバーのうち、登録されていないものを登録する
+3. **スキルを集める**
    - `skills.txt`のリポジトリを`~/.local/share/dotfiles/skill-repos/`に取得する。取得済みなら最新にする
    - 各スキルと自作スキルを`~/.agents/skills/<名前>`にリンクする
-3. **Claude Codeへ配る**
+4. **Claude Codeへ配る**
    - 宣言したスキルを、Claude Codeの全アカウントの`skills/`にリンクする
-4. **共通の指示と設定をリンクする**
+5. **共通の指示と設定**
    - `ai/AGENTS.md`を、全アカウントの`CLAUDE.md`と`AGENTS.md`にリンクする
-   - `ai/claude/settings.json`の内容を、Claude Codeの全アカウントの`settings.json`に重ねて書き込む
+   - `ai/claude/settings.json`の内容を、Claude Codeの全アカウントの`settings.json`に重ねて書き込む。消える許可ルールがあれば、先に表示する
 
 - 安全のための決まり
   - 宣言から消したスキルのリンクは片付ける。ただし、消すのはこのdotfilesが作ったリンクだけ
@@ -269,7 +285,8 @@ ai/claude/settings.json ──(内容を重ねて書き込む)──▶ Claude C
   - 本体：`claude`と`codex`があるか、CodexがHomebrewから入っているか
   - 共通の指示：全アカウントで`ai/AGENTS.md`へのリンクになっているか
   - Claude Codeの設定：`ai/claude/settings.json`の内容が入っているか。違うときは、違うキーを表示する
-  - プラグイン：宣言したものが入っているか、宣言にないものが入っていないか
+  - プラグイン：宣言したものが入っているか、宣言にないものが入っていないか（claude.aiから同期されたものや、Codexに最初から入っているものは数えない）
+  - MCPサーバー：宣言したものが全アカウントに登録されているか
   - スキル：宣言したものが`~/.agents/skills/`とClaude Codeの全アカウントにあるか、壊れたリンクがないか
   - 問題があれば、終了ステータス1で終わる
 - 共通の処理は`ai/lib.sh`にまとめ、3つのスクリプトから読み込んでいる
@@ -277,14 +294,13 @@ ai/claude/settings.json ──(内容を重ねて書き込む)──▶ Claude C
 ## 6. dotfilesの外から入ってくるもの
 
 - 次のものは、このdotfilesでは管理していない
-- 元から入っていたものなので、消さずにそのままにしている
 
 | 入ってくるもの | 場所 | 対象 | 補足 |
 | --- | --- | --- | --- |
-| claude.aiのアカウントのスキル | `~/.claude/skills/synced/` | Claude Code | ログインしているアカウントで有効にしたものが同期される。同じ名前のスキルがあると`/anthropic-skills:名前`で呼ぶ |
+| claude.aiのアカウントのスキルとプラグイン | `~/.claude/skills/synced/`など | Claude Code | ログインしているアカウントで有効にしたものが同期される。同じ名前のスキルがあると`/anthropic-skills:名前`で呼ぶ。プラグインは`@synced`という配布元で入る |
 | Claude Codeに最初から入っているスキル | 本体 | Claude Code | `/loop`、`/code-review`、`/simplify`など |
 | Codexに最初から入っているスキルとプラグイン | `~/.codex/skills/.system/`など | Codex | imagegen、documents、browserなど。`ai-doctor`は「宣言にない」とは言わない |
-| Cursorが置いたスキル | `~/.agents/skills/` | Codex | `canvas`、`babysit`など。Claude Codeにはリンクしない |
+| Codexに登録されたMCPサーバー | Codexの`config.toml` | Codex | ChatGPTアプリが登録したもの（OpenAIの開発者ドキュメントなど） |
 
 - **Claude Desktopアプリ（Cowork）**
   - `~/.claude/skills/`も、リンクになっている`CLAUDE.md`も読まない
@@ -302,8 +318,9 @@ ai/claude/settings.json ──(内容を重ねて書き込む)──▶ Claude C
   - 合わなければ`ai/plugins.txt`から外し、プラグインもアンインストールする
 - **Codexの`openai-curated-remote`にあるプラグインは、ChatGPTにログインしていないアカウントには入れられない**
   - 同じものが`claude-plugins-official`にあれば、そちらを`ai/plugins.txt`に書く
-- **`.env.*`の読み取りを禁止しているので、`.env.example`も読めない**
-  - 読ませたいときは、そのプロジェクトの`.claude/settings.local.json`で許可する
+- **`~/.agents/skills/`は、他のツールもスキルを置く場所**
+  - 以前はCursorのスキルが20個あり、Codexにも見えていた（Cursorを使わなくなったので削除した）
+  - `ai-doctor`は、宣言していないスキルがあると「他のツールが置いたスキル」として表示する
 - **find-skillsは、見つけたスキルを`npx skills add`で直接入れようとする**
   - そのまま入れると、このdotfilesの宣言に残らない
   - 使い続けるなら、`ai/skills.txt`に書いて`./ai/install.sh`で入れる
