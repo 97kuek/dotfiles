@@ -49,6 +49,24 @@
 | --- | --- | --- | --- |
 | find-skills | 「〇〇するスキルはある？」と聞いたときに、[skills.sh](https://skills.sh/)や`npx skills find`で公開されているスキルを探す | 自動 | [vercel-labs/skills](https://github.com/vercel-labs/skills/tree/main/skills/find-skills) |
 
+#### HTMLの図（ロゴ入りの構成図など）
+
+- 「thesvgでロゴを取る」＋「HTMLの図を作るスキル」の組み合わせで使う
+- 例：「使っているサービスのロゴを入れて、このリポジトリの構成図をHTMLで作って」
+
+| スキル | 内容 | 呼ばれ方 | 配布元 |
+| --- | --- | --- | --- |
+| html | 1つのHTMLファイルで作るもの（レポート、説明ページ、図など）の入口。図の依頼は html-diagram に回す | 自動 | [plannotator/effective-html](https://github.com/plannotator/effective-html/tree/main/skills/html) |
+| html-diagram | 構成図、シーケンス図、状態遷移、階層などを、内容に合った形のHTMLで作る | html から回される、または`/html-diagram`（Codexは`$html-diagram`） | [plannotator/effective-html](https://github.com/plannotator/effective-html/tree/main/skills/html-diagram) |
+| design-artifact | HTMLの配色、フォント、レイアウトの方向性を決める。html と html-diagram が読み込む | 自動 | [plannotator/effective-html](https://github.com/plannotator/effective-html/tree/main/skills/design-artifact) |
+| thesvg | サービスやブランドのロゴ（SVG）を取ってくる。7,400個以上。AWS・Azure・GCPのアイコンもある | 自動 | [glincker/thesvg](https://github.com/glincker/thesvg/tree/main/skills/thesvg) |
+
+- effective-htmlのスキルは、互いのファイルを参照し合う
+  - html-diagram は「直接呼ばれたとき」か「html から回されたとき」だけ動く作りなので、3つを一緒に入れている
+  - Codexでは、html-diagram は自動で選ばれる一覧に出ない（作者の設定）。html から回されるか、`$html-diagram`で呼ぶ
+- ロゴは各社の商標。個人の構成図に使うのは問題ないが、配布物に載せるときは各社のガイドラインを確認する
+- Claude Codeでは、`artifact-diagramming`（最初から入っている）を使うと、図をclaude.aiの非公開ページとして共有できる
+
 - find-skillsは、見つけたスキルを`npx skills add`で直接入れようとする
   - そのまま入れると、dotfilesの宣言に残らない
   - 使い続けたいスキルが見つかったら、`ai/skills.txt`に書いて`./ai/install.sh`で入れる

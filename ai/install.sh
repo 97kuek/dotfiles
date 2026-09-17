@@ -82,17 +82,23 @@ install_mcp_servers() {
 # --- スキル ------------------------------------------------------------------
 
 # ai/skills.txt のリポジトリを取得する。取得済みなら最新にする。
+# 大きなリポジトリもあるので、中身は宣言したスキルのフォルダ（$2 以降）だけを取り出す。
 fetch_repo() {
-  dest="$SKILL_REPOS/$1"
+  repo=$1
+  shift
+  dest="$SKILL_REPOS/$repo"
   if [ -d "$dest/.git" ]; then
+    git -C "$dest" sparse-checkout set -- "$@" ||
+      warn "$repo の取り出すフォルダを変えられませんでした。"
     git -C "$dest" pull --ff-only --quiet ||
-      warn "$1 を更新できませんでした。前回取得した内容を使います。"
+      warn "$repo を更新できませんでした。前回取得した内容を使います。"
   else
     mkdir -p "$(dirname "$dest")"
-    if git clone --depth 1 --quiet "https://github.com/$1.git" "$dest"; then
-      echo "  取得: $1"
+    if git clone --depth 1 --filter=blob:none --sparse --quiet "https://github.com/$repo.git" "$dest" &&
+      git -C "$dest" sparse-checkout set -- "$@"; then
+      echo "  取得: $repo"
     else
-      warn "$1 を取得できませんでした。"
+      warn "$repo を取得できませんでした。"
     fi
   fi
 }
@@ -102,7 +108,9 @@ collect_skills() {
   mkdir -p "$SKILLS_HUB"
 
   config_lines "$AI_DIR/skills.txt" | awk '{ print $1 }' | sort -u | while read -r repo; do
-    fetch_repo "$repo"
+    # スキルのフォルダ名に空白は無いので、1つずつの引数として渡す。
+    # shellcheck disable=SC2046
+    fetch_repo "$repo" $(config_lines "$AI_DIR/skills.txt" | awk -v r="$repo" '$1 == r { print $2 }')
   done
 
   config_lines "$AI_DIR/skills.txt" | while read -r repo path; do

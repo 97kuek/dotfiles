@@ -22,3 +22,11 @@ anthropics/skills         skills/pdf                    # PDF
 # Vercel
 vercel-labs/agent-skills  skills/web-design-guidelines  # UIをWeb Interface Guidelinesでレビューする
 vercel-labs/skills        skills/find-skills            # 公開されているスキルを探す
+
+# HTMLの図（ロゴ入りの構成図など）
+# effective-htmlはスキル同士が参照し合う。html が振り分け、html-diagram が図を作り、
+# design-artifact が見た目の方向性を決める。html-diagram だけでは自動で使われない。
+plannotator/effective-html  skills/html                 # HTMLで作るものの入口。図は html-diagram に回す
+plannotator/effective-html  skills/html-diagram         # 構成図・シーケンス図・状態遷移などをHTMLで作る
+plannotator/effective-html  skills/design-artifact      # 配色・フォント・レイアウトの方向性を決める
+glincker/thesvg             skills/thesvg               # サービスやブランドのロゴ（SVG）を取ってくる

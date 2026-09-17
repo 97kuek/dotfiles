@@ -263,6 +263,7 @@ ai/claude/settings.json ──(内容を重ねて書き込む)──▶ Claude C
    - 全アカウントに、`mcp.txt`のMCPサーバーのうち、登録されていないものを登録する
 3. **スキルを集める**
    - `skills.txt`のリポジトリを`~/.local/share/dotfiles/skill-repos/`に取得する。取得済みなら最新にする
+   - リポジトリ全体ではなく、宣言したスキルのフォルダだけを取り出す（git の sparse-checkout）。thesvgのように50MBあるリポジトリでも、数MBで済む
    - 各スキルと自作スキルを`~/.agents/skills/<名前>`にリンクする
 4. **Claude Codeへ配る**
    - 宣言したスキルを、Claude Codeの全アカウントの`skills/`にリンクする
