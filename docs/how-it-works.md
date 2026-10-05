@@ -222,6 +222,8 @@ cask "ghostty"    # GUIアプリ
 ### 5.5 Ghostty
 
 - フォントサイズ18、テーマはTomorrow Night、ウィンドウの状態を保存する
+- 背景は少し透明にしてぼかす（`background-opacity = 0.85`、`background-blur = 20`）
+  - `background-opacity`の変更は`⌘⇧,`では反映されないので、`⌘Q`で終了して起動し直す
 - このリポジトリで追加したキー
 
 | 操作 | キー |

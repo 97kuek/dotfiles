@@ -62,7 +62,7 @@ codex     # 起動したら画面の案内に従う
 | Gitの設定 | `git/.gitconfig` | すぐに反映される |
 | SSHの接続先 | `ssh/.ssh/config`（公開したくないものは`~/.ssh/config.d/*.conf`） | すぐに反映される |
 | プロンプトの見た目 | `starship/.config/starship.toml` | すぐに反映される |
-| ターミナルの見た目やキー | `ghostty/.config/ghostty/config.ghostty` | Ghosttyで`⌘⇧,` |
+| ターミナルの見た目やキー | `ghostty/.config/ghostty/config.ghostty` | Ghosttyで`⌘⇧,`（背景の透明度だけは再起動が必要） |
 | VS Codeの設定やキー | `vscode/Library/Application Support/Code/User/`の`settings.json`、`keybindings.json` | すぐに反映される |
 | ツール、アプリ、VS Codeの拡張機能を追加する | `Brewfile` | `./install.sh` |
 | ClaudeとCodexへの共通の指示 | `ai/AGENTS.md` | 次に起動したセッションから |
